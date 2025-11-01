@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
@@ -23,6 +24,42 @@ const AnimatedBackground: React.FC = () => (
     <div className="absolute top-[10vh] left-[5vw] w-[30vw] h-[30vw] bg-p-green-light/30 rounded-full filter blur-3xl opacity-50 animate-blob-move-1"></div>
     <div className="absolute top-[40vh] right-[10vw] w-[25vw] h-[25vw] bg-s-teal-light/30 rounded-full filter blur-3xl opacity-50 animate-blob-move-2"></div>
     <div className="absolute bottom-[5vh] left-[20vw] w-[20vw] h-[20vw] bg-accent-gold-light/30 rounded-full filter blur-3xl opacity-50 animate-blob-move-3"></div>
+  </div>
+);
+
+const ApiKeyInstructions: React.FC = () => (
+  <div className="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 p-6 mb-6 w-full max-w-3xl rounded-md shadow-soft no-print" role="alert">
+    <div className="flex">
+      <div className="flex-shrink-0">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+      <div className="ml-4">
+        <h3 className="text-lg font-bold">জেমিনি এপিআই কী সেটআপ করুন</h3>
+        <div className="mt-2 text-sm space-y-2">
+          <p>
+            মনে হচ্ছে আপনার Gemini API কী সেট করা নেই। চিন্তা করবেন না, এটি ঠিক করা সহজ! যেহেতু আপনি Netlify ব্যবহার করছেন, অনুগ্রহ করে এই ধাপগুলি অনুসরণ করুন:
+          </p>
+          <ol className="list-decimal list-inside space-y-1 pl-2">
+            <li>আপনার Netlify অ্যাকাউন্টে লগইন করুন এবং আপনার সাইটের ড্যাশবোর্ডে যান।</li>
+            <li><strong>Site configuration</strong> &gt; <strong>Build &amp; deploy</strong> &gt; <strong>Environment</strong> এ যান।</li>
+            <li><strong>Environment variables</strong> বিভাগে, <strong>"Add a variable"</strong> এ ক্লিক করুন।</li>
+            <li>
+              দুটি ক্ষেত্র পূরণ করুন:
+              <ul className="list-disc list-inside ml-4 mt-1 bg-yellow-100 p-2 rounded">
+                <li><strong>Key:</strong> <code className="font-mono bg-yellow-200 px-1 rounded">API_KEY</code> (সঠিকভাবে এই নামটিই ব্যবহার করুন)</li>
+                <li><strong>Value:</strong> এখানে আপনার Gemini API কী পেস্ট করুন।</li>
+              </ul>
+            </li>
+            <li><strong>Save</strong> করুন এবং তারপর আপনার সাইটটি পুনরায় ডিপ্লয় (redeploy) করতে <strong>"Trigger deploy"</strong> করুন।</li>
+          </ol>
+          <p className="mt-3">
+            পুনরায় ডিপ্লয় করার পরে, কী উপলব্ধ হবে এবং অ্যাপটি সঠিকভাবে কাজ করবে। নিরাপত্তার জন্য, আপনার API কী সরাসরি কোডে লিখবেন না।
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
 );
 
@@ -146,7 +183,11 @@ const App: React.FC = () => {
     } catch (err) {
       console.error("Error fetching recommendations:", err);
       if (err instanceof Error) {
-        setError(err.message);
+        if (err.message.includes("এপিআই কী অনুপস্থিত")) {
+          setError("API_KEY_MISSING");
+        } else {
+          setError(err.message);
+        }
       } else {
         setError("সুপারিশ আনার সময় একটি অজানা ত্রুটি ঘটেছে।");
       }
@@ -189,7 +230,9 @@ const App: React.FC = () => {
       <AnimatedBackground />
       <Header />
       <main className="flex-grow container mx-auto p-4 sm:p-6 md:p-8 flex flex-col items-center justify-center animate-fadeIn">
-        {error && (
+        {error === "API_KEY_MISSING" ? (
+          <ApiKeyInstructions />
+        ) : error ? (
           <div 
             className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 w-full max-w-2xl rounded-md shadow-soft flex items-start no-print" 
             role="alert"
@@ -202,7 +245,7 @@ const App: React.FC = () => {
               <p className="text-sm">{error}</p>
             </div>
           </div>
-        )}
+        ) : null}
 
         {showWelcomeScreen ? (
           <WelcomeScreen onStart={handleStartAssessment} />

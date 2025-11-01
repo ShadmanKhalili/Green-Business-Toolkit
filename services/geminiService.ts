@@ -1,3 +1,4 @@
+
 import { GoogleGenAI } from "@google/genai";
 import type { Answer, PreAssessmentData } from '../types'; 
 import { MAX_SCORE_PER_QUESTION, QUESTION_WEIGHTS_BY_BUSINESS_TYPE } from '../constants';
@@ -9,7 +10,7 @@ export const getRecommendations = async (
   answers: Answer[],
   preAssessmentData: PreAssessmentData
 ) => {
-  const apiKey = (process.env as any).API_KEY;
+  const apiKey = process.env.API_KEY;
 
   if (!apiKey) {
     console.error("API_KEY is not available in process.env.");
@@ -21,7 +22,6 @@ export const getRecommendations = async (
   }
 
   const ai = new GoogleGenAI({ apiKey: apiKey });
-  const model = 'gemini-2.5-pro'; 
 
   const categoryScores: Record<string, { currentWeighted: number; maxWeighted: number; questions: string[] }> = {};
   
@@ -105,15 +105,12 @@ ${improvementAreasSummary}
 
   try {
     const response = await ai.models.generateContent({
-      model: model,
+      model: 'gemini-2.5-flash',
       contents: prompt,
        config: {
         temperature: 0.75, 
         topP: 0.95,
         topK: 40,
-        thinkingConfig: {
-          thinkingBudget: 32768,
-        },
       }
     });
     
