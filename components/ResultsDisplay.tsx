@@ -498,10 +498,10 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = (props) => {
     csvContent += [escapeCsvCell("সামগ্রিক স্কোর"), escapeCsvCell("মোট স্কোর (ভারযুক্ত)"), escapeCsvCell(score.toFixed(2))].join(',') + '\n';
     csvContent += [escapeCsvCell("সামগ্রিক স্কোর"), escapeCsvCell("সর্বোচ্চ সম্ভাব্য স্কোর (ভারযুক্ত)"), escapeCsvCell(maxPossibleScore.toFixed(2))].join(',') + '\n';
     
-// Fix: Explicitly type the accumulator for the reduce function.
-// This ensures that `categoryBreakdown` has the correct type, resolving type errors
-// when accessing `data.score` and `data.maxScore` in the subsequent forEach loop.
-    const categoryBreakdown = props.answers.reduce((acc, answer) => {
+    // FIX: Explicitly type the accumulator for the reduce function.
+    // This ensures that `categoryBreakdown` has the correct type, resolving type errors
+    // when accessing `data.score` and `data.maxScore` in the subsequent forEach loop.
+    const categoryBreakdown = props.answers.reduce((acc: Record<string, { score: number; maxScore: number }>, answer) => {
         if (!acc[answer.category]) {
             acc[answer.category] = { score: 0, maxScore: 0 };
         }

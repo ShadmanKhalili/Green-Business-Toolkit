@@ -10,18 +10,13 @@ export const getRecommendations = async (
   answers: Answer[],
   preAssessmentData: PreAssessmentData
 ) => {
-  const apiKey = process.env.API_KEY;
-
-  if (!apiKey) {
-    console.error("API_KEY is not available in process.env.");
-    throw new Error("ত্রুটি: জেমিনি এপিআই কী অনুপস্থিত। অনুগ্রহ করে নিশ্চিত করুন এটি সঠিকভাবে সেট করা আছে।");
-  }
+  const apiKey = "AIzaSyBLfNk0Og7RO-Fxl_fuPJJYz7IgNgOWT94";
 
   if (!preAssessmentData) {
     throw new Error("ব্যবসার প্রেক্ষাপট তথ্য (preAssessmentData) অনুপস্থিত।");
   }
 
-  const ai = new GoogleGenAI({ apiKey: apiKey });
+  const ai = new GoogleGenAI({ apiKey });
 
   const categoryScores: Record<string, { currentWeighted: number; maxWeighted: number; questions: string[] }> = {};
   
