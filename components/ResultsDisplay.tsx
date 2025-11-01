@@ -507,6 +507,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = (props) => {
         acc[answer.category].score += answer.score * weight;
         acc[answer.category].maxScore += MAX_SCORE_PER_QUESTION * weight;
         return acc;
+// FIX: Explicitly set the type of the initial value for the reduce function to prevent type errors.
     }, {} as Record<string, { score: number; maxScore: number }>);
 
     csvContent += [escapeCsvCell("বিভাগভিত্তিক স্কোর"), escapeCsvCell("বিভাগের নাম"), escapeCsvCell("প্রাপ্ত স্কোর (ভারযুক্ত)"), escapeCsvCell("বিভাগের সর্বোচ্চ স্কোর (ভারযুক্ত)"), escapeCsvCell("שতাংশ")].join(',') + '\n';

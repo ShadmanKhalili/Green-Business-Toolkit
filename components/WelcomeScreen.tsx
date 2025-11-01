@@ -1,19 +1,5 @@
 import React from 'react';
-
-// Updated WelcomeLeafIcon to match Header's LeafIcon
-const WelcomeLeafIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    fill="none" 
-    viewBox="0 0 24 24" 
-    strokeWidth={1.5} 
-    stroke="currentColor" 
-    className={className || "w-16 h-16"}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9 9 0 00-9-9c0-4.969 4.031-9 9-9s9 4.031 9 9-4.031 9-9 9z" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c-4.969 0-9 4.031-9 9 0 2.484 1.008 4.734 2.635 6.365A8.96 8.96 0 0112 3z" />
-  </svg>
-);
+import { WelcomeCoverArt } from './WelcomeCoverArt';
 
 // Icons for the "How it works" steps
 const ChecklistIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -49,10 +35,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart }) => {
       
       {/* Hero Section */}
       <div className="animated-component animate-slide-fade-in">
-        <div title="সবুজ ব্যবসা মূল্যায়ন টুলকিট" className="inline-block animate-subtle-beat" style={{ animationDuration: '3s' }}>
-          <WelcomeLeafIcon className="w-20 h-20 sm:w-24 sm:h-24 text-p-green mx-auto mb-6" />
-        </div>
-        <h2 className="text-3xl sm:text-4xl font-bold text-text-primary mb-3 animated-component animate-slide-fade-in animation-delay-100">
+        <WelcomeCoverArt />
+        <h2 className="text-3xl sm:text-4xl font-bold text-text-primary mb-3 mt-8 animated-component animate-slide-fade-in animation-delay-100">
           সবুজ ব্যবসা মূল্যায়ন টুলকিটে স্বাগতম!
         </h2>
         <p className="text-md sm:text-lg text-text-secondary mb-10 max-w-xl mx-auto animated-component animate-slide-fade-in animation-delay-200">
