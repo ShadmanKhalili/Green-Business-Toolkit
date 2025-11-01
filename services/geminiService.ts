@@ -21,7 +21,7 @@ export const getRecommendations = async (
   }
 
   const ai = new GoogleGenAI({ apiKey: apiKey });
-  const model = 'gemini-2.5-flash'; 
+  const model = 'gemini-2.5-pro'; 
 
   const categoryScores: Record<string, { currentWeighted: number; maxWeighted: number; questions: string[] }> = {};
   
@@ -110,7 +110,10 @@ ${improvementAreasSummary}
        config: {
         temperature: 0.75, 
         topP: 0.95,
-        topK: 40
+        topK: 40,
+        thinkingConfig: {
+          thinkingBudget: 32768,
+        },
       }
     });
     
