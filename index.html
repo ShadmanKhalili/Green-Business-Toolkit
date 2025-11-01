@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="bn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>সবুজ ব্যবসা মূল্যায়ন টুলকিট</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', '"Noto Sans"', 'sans-serif', '"Apple Color Emoji"', '"Segoe UI Emoji"', '"Segoe UI Symbol"', '"Noto Color Emoji"'],
+            },
+            colors: {
+              'p-green': '#4CAF50', // Primary Green
+              'p-green-dark': '#388E3C',
+              'p-green-light': '#C8E6C9',
+              's-teal': '#00897B',   // Secondary Teal
+              's-teal-dark': '#00695C',
+              's-teal-light': '#B2DFDB',
+              'accent-gold': '#FFB300', // Accent Gold
+              'accent-gold-light': '#FFE082',
+              'bg-main': '#F8F9FA',         // Main background (light, clean)
+              'bg-offset': '#FFFFFF',       // Card/modal background (white)
+              'text-primary': '#212529',    // Primary text (dark, high contrast)
+              'text-secondary': '#495057',  // Secondary text
+              'text-muted': '#6C757D',      // Muted text, icons
+              'border-color': '#DEE2E6',    // Borders, dividers
+              'disabled-bg': '#E9ECEF',
+              'disabled-text': '#6C757D',
+              // Standard status colors (Tailwind defaults are generally fine)
+              // 'red-500': '#EF4444', (example, if needed to ensure it's available)
+              // 'yellow-500': '#EAB308',
+              // 'orange-500': '#F97316',
+            },
+            boxShadow: {
+              'soft': '0 4px 12px rgba(0, 0, 0, 0.08)',
+              'soft-lg': '0 8px 16px rgba(0, 0, 0, 0.08)',
+              'interactive': '0 2px 8px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06)',
+              'interactive-hover': '0 6px 16px rgba(0,0,0,0.12), 0 3px 8px rgba(0,0,0,0.08)',
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.5s ease-out',
+              'slide-in-up': 'slideInUp 0.5s ease-out',
+              'subtle-beat': 'subtleBeat 1.5s infinite ease-in-out',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: 0 },
+                '100%': { opacity: 1 },
+              },
+              slideInUp: {
+                '0%': { transform: 'translateY(20px)', opacity: 0 },
+                '100%': { transform: 'translateY(0)', opacity: 1 },
+              },
+              subtleBeat: {
+                '0%, 100%': { transform: 'scale(1)' },
+                '50%': { transform: 'scale(1.03)' },
+              }
+            }
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.0.1",
+    "jspdf": "https://esm.sh/jspdf@2.5.1",
+    "html2canvas": "https://esm.sh/html2canvas@1.4.1"
+  }
+}
+</script>
+<style>
+  /* Styles for PDF Capture Mode (applied dynamically via JS) */
+  .pdf-capture-mode {
+    background-color: #ffffff !important; /* Force white background for main capture area */
+    box-shadow: none !important;
+    border: none !important;
+  }
+  .pdf-capture-mode .text-text-primary,
+  .pdf-capture-mode .text-text-secondary,
+  .pdf-capture-mode .text-text-muted,
+  .pdf-capture-mode .text-s-teal-dark,
+  .pdf-capture-mode .text-red-500,
+  .pdf-capture-mode .text-yellow-500,
+  .pdf-capture-mode .text-orange-500,
+  .pdf-capture-mode .text-p-green {
+    color: #000000 !important; /* Force black text */
+  }
+  .pdf-capture-mode .bg-gradient-to-r,
+  .pdf-capture-mode .bg-disabled-bg,
+  .pdf-capture-mode .bg-bg-main,
+  .pdf-capture-mode .bg-p-green-light,
+  .pdf-capture-mode .bg-s-teal-light,
+  .pdf-capture-mode .bg-green-50, /* Kept for specific cases if not updated */
+  .pdf-capture-mode .bg-orange-50 { /* Kept for specific cases if not updated */
+    background: #ffffff !important; /* Force white backgrounds for inner elements */
+  }
+  .pdf-capture-mode .shadow-soft,
+  .pdf-capture-mode .shadow-soft-lg,
+  .pdf-capture-mode .shadow-interactive,
+  .pdf-capture-mode .shadow-interactive-hover {
+    box-shadow: none !important; /* Remove shadows */
+  }
+  .pdf-capture-mode .border,
+  .pdf-capture-mode .border-border-color,
+  .pdf-capture-mode .border-green-200, /* Kept for specific cases */
+  .pdf-capture-mode .border-orange-200, /* Kept for specific cases */
+  .pdf-capture-mode .border-p-green-dark,
+  .pdf-capture-mode .border-yellow-500,
+  .pdf-capture-mode .border-red-500 {
+    border: 1px solid #cccccc !important; /* Simplify borders */
+  }
+   .pdf-capture-mode .circular-progress-print svg {
+      display: none !important;
+    }
+    .pdf-capture-mode .circular-progress-print-text {
+      display: block !important;
+      color: #000000 !important;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+  @media print {
+    body {
+      font-family: Arial, sans-serif; /* Standard print font */
+      color: #000 !important;
+      background-color: #fff !important;
+    }
+    .no-print {
+      display: none !important;
+    }
+    .print-only {
+      display: block !important;
+    }
+    .print-container {
+      width: 100% !important;
+      max-width: 100% !important;
+      box-shadow: none !important;
+      border: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    .print-text-black {
+      color: #000 !important;
+    }
+    .print-bg-white {
+      background-color: #fff !important;
+    }
+    .print-no-shadow {
+      box-shadow: none !important;
+    }
+    .print-no-border {
+      border: none !important;
+    }
+    .print-break-after-page {
+        page-break-after: always;
+    }
+    .print-break-inside-avoid {
+        page-break-inside: avoid;
+    }
+    #root > div > header, /* Hides Header */
+    #root > div > footer, /* Hides Footer */
+    .results-actions-no-print, /* Class for restart/print buttons container */
+    .question-navigation-no-print, /* Class for QuestionNavigator if ever on results */
+    .progress-bar-no-print /* Class for ProgressBar if ever on results */
+     {
+      display: none !important;
+    }
+    /* Ensure results specific elements are styled for print */
+    .results-display-container {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important; /* Optional: add a light border for sections */
+    }
+    .results-display-container h2, 
+    .results-display-container h3,
+    .results-display-container p,
+    .results-display-container li,
+    .results-display-container span {
+        color: #000 !important;
+    }
+    .results-display-container .bg-gradient-to-r,
+    .results-display-container .bg-bg-main,
+    .results-display-container .bg-disabled-bg,
+    .results-display-container .bg-bg-offset {
+        background: #fff !important;
+    }
+    .category-breakdown-item-print {
+        border: 1px solid #eee !important;
+        padding: 10px !important;
+        margin-bottom: 10px !important;
+        page-break-inside: avoid;
+    }
+    .recommendations-print li p, 
+    .recommendations-print li div > p { /* Ensure paragraphs within list items or divs get line height */
+        line-height: 1.5;
+    }
+    .circular-progress-print svg { /* Hide circular progress as it might not print well, show text instead */
+        display: none;
+    }
+    .circular-progress-print-text {
+        display: block !important; /* Show a text version of percentage */
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+  }
+</style>
+</head>
+  <body class="font-sans bg-bg-main text-text-primary antialiased">
+    <noscript>এই অ্যাপটি চালাতে আপনার জাভাস্ক্রিপ্ট সক্রিয় করতে হবে।</noscript>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
