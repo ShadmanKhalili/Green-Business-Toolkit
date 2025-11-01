@@ -441,20 +441,21 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = (props) => {
         const imgProps= pdf.getImageProperties(imgData);
         const canvasWidth = imgProps.width;
         const canvasHeight = imgProps.height;
-
         const ratio = canvasHeight / canvasWidth;
+        const totalImageHeight = pdfPageWidth * ratio;
+
+        let heightLeft = totalImageHeight;
         let position = 0;
-        const pageHeight = pdfPageWidth * ratio; 
         
-        let heightLeft = pageHeight;
-        
-        pdf.addImage(imgData, 'JPEG', 0, position, pdfPageWidth, pageHeight);
+        // Add the first page (which contains the start of the image)
+        pdf.addImage(imgData, 'JPEG', 0, position, pdfPageWidth, totalImageHeight);
         heightLeft -= pdfPageHeight;
 
+        // Add subsequent pages if the image is taller than one page
         while (heightLeft > 0) {
-          position = heightLeft - pageHeight;
+          position -= pdfPageHeight; // Move the image "up" by one page height for the next slice
           pdf.addPage();
-          pdf.addImage(imgData, 'JPEG', 0, position, pdfPageWidth, pageHeight);
+          pdf.addImage(imgData, 'JPEG', 0, position, pdfPageWidth, totalImageHeight);
           heightLeft -= pdfPageHeight;
         }
 
@@ -498,20 +499,20 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = (props) => {
     csvContent += [escapeCsvCell("সামগ্রিক স্কোর"), escapeCsvCell("মোট স্কোর (ভারযুক্ত)"), escapeCsvCell(score.toFixed(2))].join(',') + '\n';
     csvContent += [escapeCsvCell("সামগ্রিক স্কোর"), escapeCsvCell("সর্বোচ্চ সম্ভাব্য স্কোর (ভারযুক্ত)"), escapeCsvCell(maxPossibleScore.toFixed(2))].join(',') + '\n';
     
-    // FIX: Explicitly type the accumulator for the reduce function.
-    // This ensures that `categoryBreakdown` has the correct type, resolving type errors
-    // when accessing `data.score` and `data.maxScore` in the subsequent forEach loop.
-    const categoryBreakdown = props.answers.reduce((acc: Record<string, { score: number; maxScore: number }>, answer) => {
-        if (!acc[answer.category]) {
-            acc[answer.category] = { score: 0, maxScore: 0 };
-        }
-        const weight = QUESTION_WEIGHTS_BY_BUSINESS_TYPE[preAssessmentData.businessType]?.[answer.questionId] ?? 1.0;
-        acc[answer.category].score += answer.score * weight;
-        acc[answer.category].maxScore += MAX_SCORE_PER_QUESTION * weight;
-        return acc;
-    }, {} as Record<string, { score: number; maxScore: number }>);
+    // FIX: Use a standard for...of loop to build the category breakdown.
+    // This provides clearer, more reliable type inference than a complex reduce function,
+    // resolving type errors when accessing properties in the subsequent loop.
+    const categoryBreakdown: Record<string, { score: number; maxScore: number }> = {};
+    for (const answer of props.answers) {
+      if (!categoryBreakdown[answer.category]) {
+        categoryBreakdown[answer.category] = { score: 0, maxScore: 0 };
+      }
+      const weight = QUESTION_WEIGHTS_BY_BUSINESS_TYPE[preAssessmentData.businessType]?.[answer.questionId] ?? 1.0;
+      categoryBreakdown[answer.category].score += answer.score * weight;
+      categoryBreakdown[answer.category].maxScore += MAX_SCORE_PER_QUESTION * weight;
+    }
 
-    csvContent += [escapeCsvCell("বিভাগভিত্তিক স্কোর"), escapeCsvCell("বিভাগের নাম"), escapeCsvCell("প্রাপ্ত স্কোর (ভারযুক্ত)"), escapeCsvCell("বিভাগের সর্বোচ্চ স্কোর (ভারযুক্ত)"), escapeCsvCell("שতাংশ")].join(',') + '\n';
+    csvContent += [escapeCsvCell("বিভাগভিত্তিক স্কোর"), escapeCsvCell("বিভাগের নাম"), escapeCsvCell("প্রাপ্ত স্কোর (ভারযুক্ত)"), escapeCsvCell("বিভাগের সর্বোচ্চ স্কোর (ভারযুক্ত)"), escapeCsvCell("শতাংশ")].join(',') + '\n';
     Object.entries(categoryBreakdown).forEach(([category, data]) => {
       const catPercentage = data.maxScore > 0 ? Math.round((data.score / data.maxScore) * 100) : 0;
       csvContent += [
@@ -570,7 +571,9 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = (props) => {
               assessmentDate={new Date()}
             />
             <div className="pdf-page-break" style={{height: '1px'}}></div>
-            <ResultsContent {...props} percentage={percentage} scoreColorClass={scoreColorClass} />
+            <div className="pdf-capture-mode">
+                <ResultsContent {...props} percentage={percentage} scoreColorClass={scoreColorClass} />
+            </div>
           </div>
         </div>
       )}
