@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface ProgressBarProps {
@@ -21,7 +20,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
           aria-valuenow={displayProgress}
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-label="Assessment progress"
+          aria-label="মূল্যায়নের অগ্রগতি"
         ></div>
       </div>
     </div>

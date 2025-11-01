@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface CircularProgressProps {
@@ -31,7 +30,7 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
         width={size}
         height={size}
         viewBox={`0 0 ${size} ${size}`}
-        aria-label={`Progress: ${percentage}%`}
+        aria-label={`অগ্রগতি: ${percentage}%`}
         role="img"
       >
         <circle

@@ -25,6 +25,24 @@ interface ResultsDisplayProps {
   preAssessmentData: PreAssessmentData | null; 
 }
 
+// Skeleton Loader for Recommendations
+const RecommendationSkeleton: React.FC = () => (
+  <div className="space-y-5 animate-pulse">
+    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+    <div className="space-y-3">
+      <div className="h-3 bg-gray-200 rounded w-full"></div>
+      <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+    </div>
+    <div className="h-4 bg-gray-200 rounded w-1/2 mt-4"></div>
+     <div className="space-y-3">
+      <div className="h-3 bg-gray-200 rounded w-full"></div>
+      <div className="h-3 bg-gray-200 rounded w-4/6"></div>
+      <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+    </div>
+  </div>
+);
+
+
 // Icons for UI elements
 const ScoreTrophyIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className || "w-6 h-6"}>
@@ -50,15 +68,16 @@ const ArrowDownTrayIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-const CheckCircleIcon: React.FC<{ className?: string }> = ({ className }) => (
+const TrendingUpIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className || "w-6 h-6"}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-3.976 5.197M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
   </svg>
 );
 
-const LightbulbIcon: React.FC<{ className?: string }> = ({ className }) => (
+const WrenchScrewdriverIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className || "w-6 h-6"}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.354a12.06 12.06 0 01-4.5 0M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M12 6a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.471-2.471a1.125 1.125 0 00-1.59-1.59L9.828 12.5a1.125 1.125 0 00-1.59 1.59l2.471 2.471z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M14.082 5.109L15.33 3.86a2.652 2.652 0 013.75 3.75L17.89 8.81m-1.742-1.742l-2.47-2.47a1.125 1.125 0 00-1.59 1.59l2.47 2.47m-1.742-1.742a1.125 1.125 0 00-1.59 1.59" />
   </svg>
 );
 
@@ -69,7 +88,7 @@ const ListItemMarkerIcon: React.FC<{ className?: string }> = ({ className }) => 
 );
 
 const getCategoryIcon = (categoryName: QuestionCategory): React.ReactNode => {
-  const iconProps = { className: "w-7 h-7 mr-3 text-s-teal-dark" };
+  const iconProps = { className: "w-6 h-6 mr-3 text-s-teal-dark flex-shrink-0" };
   switch (categoryName) {
     case QuestionCategory.RESOURCE_EFFICIENCY:
       return <ResourceEfficiencyIcon {...iconProps} />;
@@ -198,10 +217,10 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
   
   const percentage = maxPossibleScore > 0 ? Math.round((score / maxPossibleScore) * 100) : 0;
   
-  let scoreColorClass = 'text-red-500 print-text-black'; // Default to Tailwind's red-500
+  let scoreColorClass = 'text-red-500 print-text-black';
   if (percentage >= 75) scoreColorClass = 'text-p-green print-text-black';
-  else if (percentage >= 50) scoreColorClass = 'text-yellow-500 print-text-black'; // Tailwind's yellow-500
-  else if (percentage >= 25) scoreColorClass = 'text-orange-500 print-text-black'; // Tailwind's orange-500
+  else if (percentage >= 50) scoreColorClass = 'text-yellow-500 print-text-black';
+  else if (percentage >= 25) scoreColorClass = 'text-orange-500 print-text-black';
 
   const getCategoryScores = () => {
     if (!preAssessmentData) return [];
@@ -286,7 +305,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
       
       const sanitizedBusinessName = sanitizeFilenamePart(preAssessmentData?.businessName);
       const sanitizedLocation = sanitizeFilenamePart(preAssessmentData?.location);
-      pdf.save(`GB_Toolkit_Result_${sanitizedBusinessName}_${sanitizedLocation}.pdf`);
+      pdf.save(`সবুজ_ব্যবসা_ফলাফল_${sanitizedBusinessName}_${sanitizedLocation}.pdf`);
 
     } catch (error) {
       console.error("Error generating PDF:", error);
@@ -336,7 +355,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
       ].join(',') + '\n';
     });
 
-    csvContent += [escapeCsvCell("প্রশ্নের উত্তর"), escapeCsvCell("প্রশ্ন"), escapeCsvCell("বিভাগ"), escapeCsvCell("উত্তর (স্কোর)"), escapeCsvCell("ওজন")].join(',') + '\n';
+    csvContent += [escapeCsvCell("প্রশ্নের উত্তর"), escapeCsvCell("প্রশ্ন"), escapeCsvCell("বিভাগ"), escapeCsvCell("উত্তর (স্কোর)"), escapeCsvCell("ওজন (Weight)")].join(',') + '\n';
      answers.forEach(ans => {
       const businessTypeWeights = QUESTION_WEIGHTS_BY_BUSINESS_TYPE[preAssessmentData.businessType];
       const weight = businessTypeWeights?.[ans.questionId] ?? 1.0;
@@ -350,7 +369,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
     });
 
     const formattedRecommendations = recommendations.replace(/\n\n+/g, " || ").replace(/\n/g, " ; ");
-    csvContent += [escapeCsvCell("ব্যক্তিগতকৃত সুপারিশ"), escapeCsvCell("সুপারিশ"), escapeCsvCell(formattedRecommendations)].join(',') + '\n';
+    csvContent += [escapeCsvCell("ব্যক্তিগতকৃত সুপারিশ"), escapeCsvCell("সুপারিশ (Recommendations)"), escapeCsvCell(formattedRecommendations)].join(',') + '\n';
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
@@ -359,7 +378,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
       link.setAttribute("href", url);
       const sanitizedBusinessName = sanitizeFilenamePart(preAssessmentData?.businessName);
       const sanitizedLocation = sanitizeFilenamePart(preAssessmentData?.location);
-      link.setAttribute("download", `GB_Toolkit_Result_Detailed_${sanitizedBusinessName}_${sanitizedLocation}.csv`);
+      link.setAttribute("download", `সবুজ_ব্যবসা_বিস্তারিত_ফলাফল_${sanitizedBusinessName}_${sanitizedLocation}.csv`);
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
@@ -369,132 +388,148 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
   };
   
   const commonButtonClasses = "flex items-center justify-center w-full sm:w-auto font-semibold py-3 px-6 sm:px-8 rounded-lg shadow-interactive hover:shadow-interactive-hover transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-opacity-60 disabled:opacity-50 disabled:cursor-not-allowed";
-  const iconSizeClass = "w-7 h-7 mr-2 sm:mr-2.5"; // Consistent icon size
+  const iconSizeClass = "w-6 h-6 mr-2 sm:mr-2.5";
 
   return (
-    <div ref={resultsRef} className="w-full max-w-3xl bg-bg-offset p-6 sm:p-8 md:p-10 rounded-xl shadow-soft-lg text-center animate-slideInUp results-display-container print-container">
-      {/* --- HEADER --- */}
-      <div className="flex flex-col items-center mb-6">
-        <ScoreTrophyIcon className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 ${scoreColorClass}`} />
-        <h2 className="text-3xl sm:text-4xl font-bold text-text-primary print-text-black mb-2">মূল্যায়ন সম্পন্ন!</h2>
-        <p className="text-md sm:text-lg text-text-secondary print-text-black">আপনার ব্যবসার সবুজ পারফরম্যান্সের সারসংক্ষেপ নিচে দেওয়া হলো।</p>
-        {preAssessmentData && (
-            <p className="text-xs sm:text-sm text-text-secondary print-text-black mt-3 bg-disabled-bg print-bg-white px-3 py-1.5 rounded-full">
-              ব্যবসা: <span className="font-semibold">{preAssessmentData.businessName}</span> ({preAssessmentData.businessType}, {preAssessmentData.location})
-            </p>
-        )}
-      </div>
-
-       {/* --- SCORE SUMMARY BLOCK --- */}
-      <div className="bg-gradient-to-r from-p-green-light/50 to-s-teal-light/50 print-bg-white p-6 rounded-lg mb-10 shadow-soft print-no-shadow print-border flex flex-col md:flex-row items-center justify-around space-y-6 md:space-y-0 md:space-x-8">
-        <div className="text-center md:text-left">
-          <p className="text-lg sm:text-xl text-s-teal-dark print-text-black font-semibold">
-            আপনার মোট সবুজ স্কোর:
-          </p>
-          <p className={`text-5xl sm:text-7xl font-bold my-1 ${scoreColorClass}`}>
-            {percentage}<span className="text-3xl sm:text-5xl text-text-secondary print-text-black">/১০০</span>
-          </p>
-          <p className="text-xs text-text-muted print-text-black mt-1">
-            (ভারযুক্ত স্কোর: {score.toFixed(2)} / {maxPossibleScore.toFixed(2)})
-          </p>
+    <div className="w-full max-w-6xl animate-slideInUp print-container">
+      <div ref={resultsRef} className="bg-bg-offset p-6 sm:p-8 md:p-10 rounded-xl shadow-soft-lg results-display-container">
+        {/* --- HEADER --- */}
+        <div className="text-center border-b-2 border-border-color pb-6 mb-8">
+          <ScoreTrophyIcon className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 ${scoreColorClass}`} />
+          <h2 className="text-3xl sm:text-4xl font-bold text-text-primary print-text-black mb-2">আপনার মূল্যায়ন ফলাফল</h2>
+          <p className="text-md sm:text-lg text-text-secondary print-text-black">আপনার ব্যবসার সবুজ পারফরম্যান্সের একটি সার্বিক চিত্র।</p>
+          {preAssessmentData && (
+              <p className="text-xs sm:text-sm text-text-secondary print-text-black mt-4 bg-disabled-bg print-bg-white px-3 py-1.5 rounded-full inline-block">
+                <strong>ব্যবসা:</strong> {preAssessmentData.businessName} ({preAssessmentData.businessType}, {preAssessmentData.location})
+              </p>
+          )}
         </div>
-        <div className="relative animate-subtle-beat circular-progress-print">
-           <CircularProgress percentage={percentage} size={140} strokeWidth={14} colorClass={scoreColorClass} />
-           <span className="hidden circular-progress-print-text print-text-black">{percentage}%</span>
-        </div>
-      </div>
 
-      {/* --- KEY INSIGHTS (STRENGTHS & IMPROVEMENTS) --- */}
-      {(strengths.length > 0 || improvements.length > 0) && (
-        <div className="mb-10 text-left p-6 bg-bg-main print-bg-white rounded-lg shadow-soft print-no-shadow print-border">
-            <h3 className="text-xl sm:text-2xl font-semibold text-text-primary print-text-black mb-5 text-center">একনজরে আপনার ফলাফল</h3>
-            <div className="grid md:grid-cols-2 gap-6">
-                {strengths.length > 0 && (
-                    <div className="print-break-inside-avoid">
-                        <h4 className="text-lg font-semibold text-p-green print-text-black mb-3 flex items-center">
-                            <CheckCircleIcon className="w-6 h-6 mr-2"/> শক্তিশালী দিকসমূহ
-                        </h4>
-                        <ul className="space-y-2 list-inside">
-                            {strengths.map(cat => (
-                                <li key={`strength-${cat.categoryName}`} className="text-sm text-text-secondary print-text-black p-2 bg-p-green-light/40 print-bg-white rounded border border-p-green-light print-border">
-                                    {cat.categoryName} ({cat.percentage}%)
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
-                {improvements.length > 0 && (
-                     <div className="print-break-inside-avoid">
-                        <h4 className="text-lg font-semibold text-orange-500 print-text-black mb-3 flex items-center">
-                             <LightbulbIcon className="w-6 h-6 mr-2"/> উন্নতির সুযোগ রয়েছে
-                        </h4>
-                        <ul className="space-y-2 list-inside">
-                            {improvements.map(cat => (
-                                <li key={`improve-${cat.categoryName}`} className="text-sm text-text-secondary print-text-black p-2 bg-orange-500/20 print-bg-white rounded border border-orange-500/40 print-border">
-                                    {cat.categoryName} ({cat.percentage}%)
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
+        {/* --- MAIN CONTENT GRID --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* --- LEFT COLUMN: SCORE & INSIGHTS --- */}
+          <div className="lg:col-span-1 space-y-8">
+            {/* --- SCORE SUMMARY BLOCK --- */}
+            <div className="bg-gradient-to-br from-s-teal-light/20 to-p-green-light/20 print-bg-white p-6 rounded-lg shadow-soft print-no-shadow print-border text-center">
+              <p className="text-xl text-s-teal-dark print-text-black font-semibold mb-2">
+                আপনার সামগ্রিক সবুজ স্কোর
+              </p>
+              <p className={`text-7xl font-bold my-1 ${scoreColorClass}`}>
+                {percentage}<span className="text-4xl text-text-secondary print-text-black">/১০০</span>
+              </p>
+              <div className="relative my-4 inline-block animate-subtle-beat circular-progress-print">
+                <CircularProgress percentage={percentage} size={160} strokeWidth={16} colorClass={scoreColorClass} />
+                <span className="hidden circular-progress-print-text print-text-black">{percentage}%</span>
+              </div>
+              <p className="text-xs text-text-muted print-text-black mt-1">
+                (ভারযুক্ত স্কোর: {score.toFixed(2)} / {maxPossibleScore.toFixed(2)})
+              </p>
             </div>
-        </div>
-      )}
-
-      {/* --- DETAILED BREAKDOWN --- */}
-      <div className="mb-10 text-left print-break-inside-avoid">
-        <h3 className="text-xl sm:text-2xl font-semibold text-text-primary print-text-black mb-5 text-center">বিভাগভিত্তিক বিস্তারিত স্কোর</h3>
-        <div className="space-y-5">
-          {categoryBreakdown.map(cat => (
-            <div key={cat.categoryName} className="p-4 sm:p-5 bg-bg-main print-bg-white rounded-xl border border-border-color print-border shadow-soft print-no-shadow transition-all hover:shadow-soft-lg category-breakdown-item-print">
-              <div className="flex items-center mb-2.5">
-                {getCategoryIcon(cat.categoryName)}
-                <div className="flex-grow">
-                  <span className="font-semibold text-md sm:text-lg text-s-teal-dark print-text-black">{cat.categoryName}</span>
+            
+            {/* --- KEY INSIGHTS (STRENGTHS & IMPROVEMENTS) --- */}
+            <div className="text-left p-6 bg-bg-main print-bg-white rounded-lg shadow-soft print-no-shadow print-border">
+                <h3 className="text-xl font-semibold text-text-primary print-text-black mb-5 text-center">একনজরে আপনার ফলাফল</h3>
+                <div className="space-y-6">
+                    {strengths.length > 0 && (
+                        <div className="print-break-inside-avoid">
+                            <h4 className="text-lg font-semibold text-p-green print-text-black mb-3 flex items-center">
+                                <TrendingUpIcon className="w-6 h-6 mr-2.5"/> আপনার সাফল্যের ক্ষেত্র
+                            </h4>
+                            <div className="flex flex-wrap gap-2">
+                                {strengths.map(cat => (
+                                    <span key={`strength-${cat.categoryName}`} className="text-sm text-text-secondary print-text-black p-2 bg-p-green-light/40 print-bg-white rounded border border-p-green-light print-border">
+                                        {cat.categoryName} ({cat.percentage}%)
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    {improvements.length > 0 && (
+                        <div className="print-break-inside-avoid">
+                            <h4 className="text-lg font-semibold text-orange-500 print-text-black mb-3 flex items-center">
+                                <WrenchScrewdriverIcon className="w-6 h-6 mr-2.5"/> উন্নতির সেরা সুযোগ
+                            </h4>
+                            <div className="flex flex-wrap gap-2">
+                                {improvements.map(cat => (
+                                    <span key={`improve-${cat.categoryName}`} className="text-sm text-text-secondary print-text-black p-2 bg-orange-500/20 print-bg-white rounded border border-orange-500/40 print-border">
+                                        {cat.categoryName} ({cat.percentage}%)
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    {strengths.length === 0 && improvements.length === 0 && (
+                        <p className="text-text-secondary print-text-black text-center py-4">কোনো নির্দিষ্ট শক্তিশালী দিক বা উন্নতির সুযোগ চিহ্নিত করা যায়নি।</p>
+                    )}
                 </div>
-                <span className="text-xs sm:text-sm text-text-secondary print-text-black font-medium bg-disabled-bg print-bg-white px-2 py-0.5 rounded">
-                    {cat.score.toFixed(2)} / {cat.maxScore.toFixed(2)} ({cat.percentage}%)
-                </span>
-              </div>
-              <div className="w-full bg-border-color print-bg-white rounded-full h-3 shadow-inner overflow-hidden">
-                <div 
-                  className={`h-3 rounded-full transition-all duration-700 ease-out print-bg-white border print-border
-                              ${cat.percentage >= 70 ? 'bg-p-green border-p-green-dark' : cat.percentage >= 40 ? 'bg-yellow-400 border-yellow-500' : 'bg-red-400 border-red-500'}`} 
-                  style={{ width: `${cat.percentage}%` }}
-                  role="progressbar"
-                  aria-valuenow={cat.percentage}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-label={`${cat.categoryName} progress ${cat.percentage}%`}
-                ></div>
+            </div>
+          </div>
+          
+          {/* --- RIGHT COLUMN: DETAILS & RECOMMENDATIONS --- */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* --- DETAILED BREAKDOWN --- */}
+            <div className="text-left print-break-inside-avoid">
+              <h3 className="text-xl font-semibold text-text-primary print-text-black mb-4">বিভাগভিত্তিক বিস্তারিত স্কোর</h3>
+              <div className="space-y-4">
+                {categoryBreakdown.map(cat => {
+                  const performanceColor = cat.percentage >= 70 ? 'bg-p-green' : cat.percentage >= 40 ? 'bg-yellow-400' : 'bg-red-400';
+                  return (
+                    <div key={cat.categoryName} className="p-4 bg-bg-main print-bg-white rounded-lg border border-border-color print-border shadow-soft print-no-shadow transition-all hover:shadow-soft-lg flex items-start space-x-4">
+                      <div className={`w-1.5 h-auto self-stretch rounded-full ${performanceColor}`}></div>
+                      <div className="flex-grow">
+                        <div className="flex items-center mb-2">
+                          {getCategoryIcon(cat.categoryName)}
+                          <div className="flex-grow">
+                            <span className="font-semibold text-md text-s-teal-dark print-text-black">{cat.categoryName}</span>
+                          </div>
+                          <span className="text-sm text-text-primary print-text-black font-medium bg-disabled-bg print-bg-white px-2.5 py-1 rounded-full">
+                              {cat.percentage}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-border-color print-bg-white rounded-full h-2.5 shadow-inner overflow-hidden">
+                          <div 
+                            className={`h-2.5 rounded-full transition-all duration-700 ease-out ${performanceColor}`} 
+                            style={{ width: `${cat.percentage}%` }}
+                            role="progressbar"
+                            aria-valuenow={cat.percentage}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-label={`${cat.categoryName} অগ্রগতি ${cat.percentage}%`}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* --- RECOMMENDATIONS --- */}
-      <div className="bg-bg-main print-bg-white p-6 sm:p-8 rounded-xl text-left mb-10 shadow-soft print-no-shadow print-border print-break-inside-avoid">
-        <div className="flex items-center mb-5">
-          <RecommendationsIcon className="w-8 h-8 text-s-teal-dark print-text-black mr-3 flex-shrink-0" />
-          <h3 className="text-xl sm:text-2xl font-semibold text-text-primary print-text-black">আপনার জন্য ব্যক্তিগতকৃত সুপারিশ</h3>
+            {/* --- RECOMMENDATIONS --- */}
+            <div className="bg-bg-main print-bg-white p-6 sm:p-8 rounded-xl text-left shadow-soft print-no-shadow print-border print-break-inside-avoid">
+              <div className="flex items-center mb-5">
+                <RecommendationsIcon className="w-8 h-8 text-s-teal-dark print-text-black mr-3 flex-shrink-0" />
+                <h3 className="text-xl font-semibold text-text-primary print-text-black">আপনার জন্য ব্যক্তিগতকৃত সুপারিশ</h3>
+              </div>
+              {isLoadingRecommendations && !recommendations ? (
+                <div className="py-5 no-print pdf-hide-on-capture">
+                  <RecommendationSkeleton />
+                  <p className="text-s-teal-dark text-center mt-6">জেমিনি এআই দিয়ে উপযুক্ত পরামর্শ তৈরি করা হচ্ছে...</p>
+                </div>
+              ) : recommendations ? (
+                <div className="recommendations-print">
+                  {renderRecommendations(recommendations)}
+                </div>
+              ) : (
+                <p className="text-text-secondary print-text-black">এই মুহূর্তে কোনো সুপারিশ উপলব্ধ নেই। অনুগ্রহ করে পরে আবার চেষ্টা করুন।</p>
+              )}
+            </div>
+          </div>
         </div>
-        {isLoadingRecommendations && !recommendations ? (
-          <div className="flex flex-col items-center justify-center space-y-4 py-10 no-print pdf-hide-on-capture">
-            <LoadingSpinner />
-            <p className="text-s-teal-dark animate-pulse">জেমিনি এআই দিয়ে উপযুক্ত পরামর্শ তৈরি করা হচ্ছে...</p>
-          </div>
-        ) : recommendations ? (
-          <div className="recommendations-print">
-            {renderRecommendations(recommendations)}
-          </div>
-        ) : (
-          <p className="text-text-secondary print-text-black">এই মুহূর্তে কোনো সুপারিশ উপলব্ধ নেই। অনুগ্রহ করে পরে আবার চেষ্টা করুন।</p>
-        )}
       </div>
       
-       {/* --- ACTIONS --- */}
-      <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 results-actions-no-print pdf-hide-on-capture">
+      {/* --- ACTIONS --- */}
+      <div className="mt-8 flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 results-actions-no-print pdf-hide-on-capture">
         {isGeneratingPdf && (
           <div className="text-accent-gold flex items-center justify-center py-3 px-6">
             <LoadingSpinner /> 
@@ -505,22 +540,25 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
           onClick={handleDownloadPDF}
           disabled={isGeneratingPdf}
           className={`${commonButtonClasses} bg-accent-gold hover:bg-yellow-600 focus:ring-accent-gold text-text-primary`}
+          aria-label="ফলাফল পিডিএফ হিসাবে ডাউনলোড করুন"
         >
           <ArrowDownTrayIcon className={iconSizeClass} />
-          ফলাফল PDF ডাউনলোড করুন
+          ফলাফল (PDF) ডাউনলোড
         </button>
         <button
           onClick={handleDownloadCSV}
           disabled={isGeneratingPdf}
           className={`${commonButtonClasses} bg-s-teal hover:bg-s-teal-dark focus:ring-s-teal text-white`}
+          aria-label="বিস্তারিত ডেটা সিএসভি হিসাবে ডাউনলোড করুন"
         >
           <ArrowDownTrayIcon className={iconSizeClass} />
-          বিস্তারিত ডেটা CSV ডাউনলোড করুন
+          বিস্তারিত ডেটা (CSV)
         </button>
         <button
           onClick={onRestart}
           disabled={isGeneratingPdf}
           className={`${commonButtonClasses} bg-p-green-dark hover:bg-green-700 focus:ring-p-green-dark text-white`}
+          aria-label="মূল্যায়ন পুনরায় শুরু করুন"
         >
           <RestartIcon className={iconSizeClass} />
           পুনরায় শুরু করুন
