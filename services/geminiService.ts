@@ -1,26 +1,24 @@
-
 import { GoogleGenAI } from "@google/genai";
 import type { Answer, PreAssessmentData } from '../types'; 
 import { MAX_SCORE_PER_QUESTION, QUESTION_WEIGHTS_BY_BUSINESS_TYPE } from '../constants';
-
-const API_KEY = process.env.API_KEY;
 
 export const getRecommendationsStream = async (
   weightedScore: number, 
   weightedMaxPossibleScore: number,
   percentageScore: number,
   answers: Answer[],
-  preAssessmentData: PreAssessmentData
+  preAssessmentData: PreAssessmentData,
+  apiKey: string // Accept API key as a parameter
 ) => {
-  if (!API_KEY) {
-    console.error("API_KEY is not configured in environment variables.");
+  if (!apiKey) {
+    console.error("API_KEY was not provided to the service function.");
     throw new Error("জেমিনি এর জন্য এপিআই কী অনুপস্থিত। অনুগ্রহ করে আপনার এনভায়রনমেন্ট ভেরিয়েবলে এটি কনফিগার করুন।");
   }
   if (!preAssessmentData) {
     throw new Error("ব্যবসার প্রেক্ষাপট তথ্য (preAssessmentData) অনুপস্থিত।");
   }
 
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  const ai = new GoogleGenAI({ apiKey: apiKey });
   const model = 'gemini-2.5-flash'; 
 
   const categoryScores: Record<string, { currentWeighted: number; maxWeighted: number; questions: string[] }> = {};

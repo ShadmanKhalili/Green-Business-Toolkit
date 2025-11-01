@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
@@ -32,6 +31,9 @@ const App: React.FC = () => {
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState<boolean>(false);
   const [recommendations, setRecommendations] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+
+  // Read the API key from the window object in the top-level component.
+  const apiKey = (window as any).process?.env?.API_KEY;
 
   const calculateWeightedScore = useCallback((currentAnswers: Map<string, Answer>, currentPreAssessmentData: PreAssessmentData | null): number => {
     if (!currentPreAssessmentData) return 0;
@@ -113,8 +115,14 @@ const App: React.FC = () => {
     currentWeightedTotalScore: number, 
     currentWeightedMaxScore: number,
     currentAnswers: Map<string, Answer>, 
-    contextData: PreAssessmentData
+    contextData: PreAssessmentData,
+    apiKeyToUse?: string // Accept the API key as a parameter
   ) => {
+    if (!apiKeyToUse) {
+      setError("ত্রুটি: জেমিনি এপিআই কী অনুপস্থিত। অনুগ্রহ করে নিশ্চিত করুন এটি সঠিকভাবে সেট করা আছে।");
+      return;
+    }
+
     setIsLoadingRecommendations(true);
     setError(null);
     setRecommendations(''); // Clear previous recommendations before streaming
@@ -126,7 +134,8 @@ const App: React.FC = () => {
         currentWeightedMaxScore,
         percentageScore,
         detailedAnswers, 
-        contextData
+        contextData,
+        apiKeyToUse // Pass the key to the service
       );
       
       let fullText = '';
@@ -158,9 +167,10 @@ const App: React.FC = () => {
       const finalWeightedMaxScore = calculateDynamicWeightedMaxScore(preAssessmentData);
       setWeightedTotalScore(finalWeightedScore);
       setWeightedMaxPossibleScore(finalWeightedMaxScore);
-      fetchGeminiRecommendations(finalWeightedScore, finalWeightedMaxScore, answers, preAssessmentData);
+      // Pass the apiKey read from the component's scope
+      fetchGeminiRecommendations(finalWeightedScore, finalWeightedMaxScore, answers, preAssessmentData, apiKey);
     }
-  }, [isCompleted, answers, preAssessmentData, recommendations, isLoadingRecommendations, calculateWeightedScore, calculateDynamicWeightedMaxScore, fetchGeminiRecommendations]);
+  }, [isCompleted, answers, preAssessmentData, recommendations, isLoadingRecommendations, calculateWeightedScore, calculateDynamicWeightedMaxScore, fetchGeminiRecommendations, apiKey]);
 
   const restartAssessment = () => {
     setShowWelcomeScreen(true); 
