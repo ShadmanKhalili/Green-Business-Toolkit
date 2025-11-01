@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { RECOMMENDATION_TIPS } from '../constants';
 
@@ -50,7 +49,9 @@ export const RecommendationLoader: React.FC = () => {
       
       <div className="mt-6 p-4 bg-white/60 rounded-lg border border-p-green-light min-h-[100px] flex items-center justify-center">
         <div className="flex items-start space-x-3">
-          <LightbulbIcon className="w-8 h-8 text-accent-gold flex-shrink-0 mt-1" />
+          <div title="আপনি কি জানেন?">
+            <LightbulbIcon className="w-8 h-8 text-accent-gold flex-shrink-0 mt-1" />
+          </div>
           <div>
             <p className="font-semibold text-text-primary text-sm mb-1">আপনি কি জানেন?</p>
             <p className="text-sm text-text-secondary text-left">{currentFact}</p>

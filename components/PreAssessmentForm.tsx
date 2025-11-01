@@ -86,14 +86,16 @@ export const PreAssessmentForm: React.FC<PreAssessmentFormProps> = ({ onSubmit }
   };
 
   const inputBaseClasses = "mt-1 block w-full px-3 py-2.5 bg-bg-offset border border-border-color rounded-md shadow-sm focus:outline-none focus:border-s-teal-dark focus:ring-1 focus:ring-s-teal-dark sm:text-sm text-text-primary";
-  const iconBaseClasses = "absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted transition-all duration-200 ease-in-out group-focus-within:text-s-teal-dark group-focus-within:scale-110";
+  const iconBaseClasses = "absolute inset-y-0 left-0 pl-3 flex items-center text-text-muted transition-all duration-200 ease-in-out group-focus-within:text-s-teal-dark group-focus-within:scale-110";
   const textareaBaseClasses = `${inputBaseClasses} min-h-[80px] resize-y`;
 
 
   return (
     <div className="w-full max-w-md bg-bg-offset p-6 sm:p-8 rounded-xl shadow-soft-lg animate-slideInUp">
       <div className="flex flex-col items-center mb-6 sm:mb-8">
-        <BuildingOffice2Icon className="w-12 h-12 text-s-teal mb-3" />
+        <div title="ব্যবসার তথ্য">
+          <BuildingOffice2Icon className="w-12 h-12 text-s-teal mb-3" />
+        </div>
         <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-1">ব্যবসার তথ্য দিন</h2>
         <p className="text-sm sm:text-md text-text-secondary text-center">মূল্যায়ন শুরু করার আগে আপনার ব্যবসা সম্পর্কে কিছু তথ্য দিন।</p>
       </div>
@@ -113,7 +115,7 @@ export const PreAssessmentForm: React.FC<PreAssessmentFormProps> = ({ onSubmit }
             আপনার ব্যবসার নাম <span className="text-red-500">*</span>
           </label>
           <div className="relative group">
-            <div className={iconBaseClasses}>
+            <div className={iconBaseClasses} title="ব্যবসার নাম">
               <BriefcaseIcon />
             </div>
             <input
@@ -134,7 +136,7 @@ export const PreAssessmentForm: React.FC<PreAssessmentFormProps> = ({ onSubmit }
             ব্যবসার ধরণ
           </label>
            <div className="relative group">
-             <div className={iconBaseClasses}>
+             <div className={iconBaseClasses} title="ব্যবসার ধরণ">
                 <TagIcon className="w-5 h-5"/>
              </div>
             <select
@@ -149,7 +151,7 @@ export const PreAssessmentForm: React.FC<PreAssessmentFormProps> = ({ onSubmit }
                 </option>
               ))}
             </select>
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" title="বিকল্প নির্বাচন করুন">
                 <ChevronUpDownIcon className="h-5 w-5 text-text-muted" aria-hidden="true" />
             </div>
           </div>
@@ -160,7 +162,7 @@ export const PreAssessmentForm: React.FC<PreAssessmentFormProps> = ({ onSubmit }
             আপনার ব্যবসার অবস্থান
           </label>
           <div className="relative group">
-            <div className={iconBaseClasses}>
+            <div className={iconBaseClasses} title="অবস্থান">
                 <MapPinIcon/>
             </div>
             <select
@@ -175,7 +177,7 @@ export const PreAssessmentForm: React.FC<PreAssessmentFormProps> = ({ onSubmit }
                 </option>
               ))}
             </select>
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" title="বিকল্প নির্বাচন করুন">
                 <ChevronUpDownIcon className="h-5 w-5 text-text-muted" aria-hidden="true" />
             </div>
           </div>
@@ -186,7 +188,7 @@ export const PreAssessmentForm: React.FC<PreAssessmentFormProps> = ({ onSubmit }
             আপনার ব্যবসার কর্মী সংখ্যা কত?
           </label>
           <div className="relative group">
-            <div className={iconBaseClasses}>
+            <div className={iconBaseClasses} title="কর্মী সংখ্যা">
                 <UserGroupIcon/>
             </div>
             <select
@@ -201,7 +203,7 @@ export const PreAssessmentForm: React.FC<PreAssessmentFormProps> = ({ onSubmit }
                 </option>
               ))}
             </select>
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" title="বিকল্প নির্বাচন করুন">
                 <ChevronUpDownIcon className="h-5 w-5 text-text-muted" aria-hidden="true" />
             </div>
           </div>
@@ -212,7 +214,7 @@ export const PreAssessmentForm: React.FC<PreAssessmentFormProps> = ({ onSubmit }
             আপনার ব্যবসার সংক্ষিপ্ত বিবরণ (ঐচ্ছিক)
           </label>
           <div className="relative group">
-            <div className={`${iconBaseClasses} top-3 transform-none`}>
+            <div className={`${iconBaseClasses} top-3 transform-none`} title="ব্যবসার সংক্ষিপ্ত বিবরণ">
                  <InformationCircleIcon />
             </div>
             <textarea
@@ -231,7 +233,7 @@ export const PreAssessmentForm: React.FC<PreAssessmentFormProps> = ({ onSubmit }
             আপনার ব্যবসার প্রধান পরিবেশগত চ্যালেঞ্জ অথবা আপনি কোন সবুজ উদ্যোগ নিতে সবচেয়ে বেশি আগ্রহী? (ঐচ্ছিক)
           </label>
           <div className="relative group">
-            <div className={`${iconBaseClasses} top-3 transform-none`}>
+            <div className={`${iconBaseClasses} top-3 transform-none`} title="প্রধান চ্যালেঞ্জ বা লক্ষ্য">
                  <ChatBubbleIcon />
             </div>
             <textarea

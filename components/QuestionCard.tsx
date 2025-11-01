@@ -48,7 +48,9 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, 
                       transition-all duration-150 ease-in-out transform hover:scale-102
                       disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:shadow-none disabled:hover:scale-100`}
         >
-          <PreviousIcon className="w-5 h-5 mr-2" />
+          <span title="পূর্ববর্তী প্রশ্নে যান">
+            <PreviousIcon className="w-5 h-5 mr-2" />
+          </span>
           পূর্ববর্তী
         </button>
       </div>

@@ -101,7 +101,7 @@ const ListItemMarkerIcon: React.FC<{ className?: string }> = ({ className }) => 
 );
 
 const getCategoryIcon = (categoryName: QuestionCategory): React.ReactNode => {
-  const iconProps = { className: "w-6 h-6 mr-3 text-s-teal-dark flex-shrink-0" };
+  const iconProps = { className: "w-6 h-6 mr-3 text-s-teal-dark flex-shrink-0", title: categoryName };
   switch (categoryName) {
     case QuestionCategory.RESOURCE_EFFICIENCY:
       return <ResourceEfficiencyIcon {...iconProps} />;
@@ -258,7 +258,9 @@ const ResultsContent: React.FC<ResultsDisplayProps & { percentage: number, score
     <div className="bg-bg-offset p-6 sm:p-8 md:p-10 rounded-xl shadow-soft-lg results-display-container">
       {/* --- HEADER --- */}
       <div className="text-center border-b-2 border-border-color pb-6 mb-8 animated-component animate-slide-fade-in">
-        <ScoreTrophyIcon className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 ${scoreColorClass}`} />
+        <div title="আপনার সামগ্রিক স্কোর">
+          <ScoreTrophyIcon className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 ${scoreColorClass}`} />
+        </div>
         <h2 className="text-3xl sm:text-4xl font-bold text-text-primary print-text-black mb-2">আপনার মূল্যায়ন ফলাফল</h2>
         <p className="text-md sm:text-lg text-text-secondary print-text-black">আপনার ব্যবসার সবুজ পারফরম্যান্সের একটি সার্বিক চিত্র।</p>
         {preAssessmentData && (
@@ -297,7 +299,7 @@ const ResultsContent: React.FC<ResultsDisplayProps & { percentage: number, score
                   {strengths.length > 0 && (
                       <div className="print-break-inside-avoid">
                           <h4 className="text-lg font-semibold text-p-green print-text-black mb-3 flex items-center">
-                              <TrendingUpIcon className="w-6 h-6 mr-2.5"/> আপনার সাফল্যের ক্ষেত্র
+                              <span title="সাফল্যের ক্ষেত্র"><TrendingUpIcon className="w-6 h-6 mr-2.5"/></span> আপনার সাফল্যের ক্ষেত্র
                           </h4>
                           <div className="flex flex-wrap gap-2">
                               {strengths.map(cat => (
@@ -311,7 +313,7 @@ const ResultsContent: React.FC<ResultsDisplayProps & { percentage: number, score
                   {improvements.length > 0 && (
                       <div className="print-break-inside-avoid">
                           <h4 className="text-lg font-semibold text-orange-500 print-text-black mb-3 flex items-center">
-                              <WrenchScrewdriverIcon className="w-6 h-6 mr-2.5"/> উন্নতির সেরা সুযোগ
+                               <span title="উন্নতির সুযোগ"><WrenchScrewdriverIcon className="w-6 h-6 mr-2.5"/></span> উন্নতির সেরা সুযোগ
                           </h4>
                           <div className="flex flex-wrap gap-2">
                               {improvements.map(cat => (
@@ -371,7 +373,9 @@ const ResultsContent: React.FC<ResultsDisplayProps & { percentage: number, score
           {/* --- RECOMMENDATIONS --- */}
           <div className="bg-bg-main print-bg-white p-6 sm:p-8 rounded-xl text-left shadow-soft print-no-shadow print-border print-break-inside-avoid animated-component animate-slide-fade-in animation-delay-400">
             <div className="flex items-center mb-5">
-              <RecommendationsIcon className="w-8 h-8 text-s-teal-dark print-text-black mr-3 flex-shrink-0" />
+              <span title="ব্যক্তিগতকৃত সুপারিশ">
+                <RecommendationsIcon className="w-8 h-8 text-s-teal-dark print-text-black mr-3 flex-shrink-0" />
+              </span>
               <h3 className="text-xl font-semibold text-text-primary print-text-black">আপনার জন্য ব্যক্তিগতকৃত সুপারিশ</h3>
             </div>
             {isLoadingRecommendations && !recommendations ? (
@@ -494,9 +498,9 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = (props) => {
     csvContent += [escapeCsvCell("সামগ্রিক স্কোর"), escapeCsvCell("মোট স্কোর (ভারযুক্ত)"), escapeCsvCell(score.toFixed(2))].join(',') + '\n';
     csvContent += [escapeCsvCell("সামগ্রিক স্কোর"), escapeCsvCell("সর্বোচ্চ সম্ভাব্য স্কোর (ভারযুক্ত)"), escapeCsvCell(maxPossibleScore.toFixed(2))].join(',') + '\n';
     
-    // Fix: Explicitly type the initial value for reduce to ensure correct type inference for `categoryBreakdown`.
-    // This resolves the subsequent errors where properties were being accessed on an 'unknown' type.
-    const categoryBreakdown = props.answers.reduce((acc, answer) => {
+    // Fix: Explicitly provide a generic type to `reduce` to ensure correct type inference for `categoryBreakdown`.
+    // This resolves errors where properties were being accessed on an 'unknown' type inside the subsequent forEach loop.
+    const categoryBreakdown = props.answers.reduce<Record<string, { score: number; maxScore: number }>>((acc, answer) => {
         if (!acc[answer.category]) {
             acc[answer.category] = { score: 0, maxScore: 0 };
         }
@@ -504,9 +508,9 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = (props) => {
         acc[answer.category].score += answer.score * weight;
         acc[answer.category].maxScore += MAX_SCORE_PER_QUESTION * weight;
         return acc;
-    }, {} as Record<string, { score: number; maxScore: number }>);
+    }, {});
 
-    csvContent += [escapeCsvCell("বিভাগভিত্তিক স্কোর"), escapeCsvCell("বিভাগের নাম"), escapeCsvCell("প্রাপ্ত স্কোর (ভারযুক্ত)"), escapeCsvCell("বিভাগের সর্বোচ্চ স্কোর (ভারযুক্ত)"), escapeCsvCell("শতাংশ")].join(',') + '\n';
+    csvContent += [escapeCsvCell("বিভাগভিত্তিক স্কোর"), escapeCsvCell("বিভাগের নাম"), escapeCsvCell("প্রাপ্ত স্কোর (ভারযুক্ত)"), escapeCsvCell("বিভাগের সর্বোচ্চ স্কোর (ভারযুক্ত)"), escapeCsvCell("שতাংশ")].join(',') + '\n';
     Object.entries(categoryBreakdown).forEach(([category, data]) => {
       const catPercentage = data.maxScore > 0 ? Math.round((data.score / data.maxScore) * 100) : 0;
       csvContent += [
@@ -580,7 +584,9 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = (props) => {
               className={`${commonButtonClasses} bg-accent-gold hover:bg-yellow-600 focus:ring-accent-gold text-text-primary`}
               aria-label="ফলাফল পিডিএফ হিসাবে ডাউনলোড করুন"
             >
-              <ArrowDownTrayIcon className={iconSizeClass} />
+              <span title="ফলাফল পিডিএফ হিসাবে ডাউনলোড করুন">
+                <ArrowDownTrayIcon className={iconSizeClass} />
+              </span>
               PDF ডাউনলোড
             </button>
             <button
@@ -589,7 +595,9 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = (props) => {
               className={`${commonButtonClasses} bg-s-teal hover:bg-s-teal-dark focus:ring-s-teal text-white`}
               aria-label="বিস্তারিত ডেটা সিএসভি হিসাবে ডাউনলোড করুন"
             >
-              <ArrowDownTrayIcon className={iconSizeClass} />
+              <span title="বিস্তারিত ডেটা সিএসভি হিসাবে ডাউনলোড করুন">
+                <ArrowDownTrayIcon className={iconSizeClass} />
+              </span>
               CSV ডাউনলোড
             </button>
             <button
@@ -598,7 +606,9 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = (props) => {
               className={`${commonButtonClasses} bg-p-green-dark hover:bg-green-700 focus:ring-p-green-dark text-white`}
               aria-label="মূল্যায়ন পুনরায় শুরু করুন"
             >
-              <RestartIcon className={iconSizeClass} />
+              <span title="মূল্যায়ন পুনরায় শুরু করুন">
+                <RestartIcon className={iconSizeClass} />
+              </span>
               পুনরায় শুরু
             </button>
           </div>

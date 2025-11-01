@@ -39,12 +39,16 @@ export const Certificate: React.FC<CertificateProps> = ({ businessName, percenta
       <div className="w-full h-full flex items-center justify-center relative border-8 border-s-teal-dark p-2">
         <div className="w-full h-full flex flex-col text-center border-2 border-p-green p-6 relative">
           {/* Watermark */}
-          <CertificateLeafIcon className="absolute inset-0 m-auto w-3/4 h-3/4 text-p-green-light opacity-10 z-0" />
+          <div title="সবুজ ব্যবসার প্রতীক" className="absolute inset-0 m-auto w-3/4 h-3/4 text-p-green-light opacity-10 z-0">
+            <CertificateLeafIcon className="w-full h-full" />
+          </div>
           
           {/* Header */}
           <header className="relative z-10 mb-4">
             <div className="flex items-center justify-center space-x-4">
-              <CertificateLeafIcon className="w-14 h-14 text-s-teal" />
+              <div title="সবুজ ব্যবসার প্রতীক">
+                <CertificateLeafIcon className="w-14 h-14 text-s-teal" />
+              </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-s-teal-dark">
                   সবুজ ব্যবসা মূল্যায়ন

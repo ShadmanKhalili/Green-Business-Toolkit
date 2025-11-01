@@ -3,7 +3,7 @@ import React from 'react';
 // Updated WelcomeLeafIcon to match Header's LeafIcon
 const WelcomeLeafIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg 
-    xmlns="http://www.w.w3.org/2000/svg" 
+    xmlns="http://www.w3.org/2000/svg" 
     fill="none" 
     viewBox="0 0 24 24" 
     strokeWidth={1.5} 
@@ -42,7 +42,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart }) => {
   return (
     <div className="w-full max-w-2xl bg-bg-offset p-8 sm:p-12 rounded-xl shadow-soft-lg text-center animate-slideInUp no-print">
       <div className="animate-fade-in" style={{ animationDelay: '100ms' }}>
-        <WelcomeLeafIcon className="w-20 h-20 sm:w-24 sm:h-24 text-p-green mx-auto mb-6" />
+        <div title="সবুজ ব্যবসা মূল্যায়ন টুলকিট" className="inline-block">
+          <WelcomeLeafIcon className="w-20 h-20 sm:w-24 sm:h-24 text-p-green mx-auto mb-6" />
+        </div>
         <h2 className="text-2xl sm:text-3xl font-bold text-text-primary mb-3">
           সবুজ ব্যবসা মূল্যায়ন টুলকিটে স্বাগতম!
         </h2>
@@ -54,7 +56,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart }) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center mb-10">
         {/* Step 1 */}
         <div className="flex flex-col items-center p-4 animate-fade-in" style={{ animationDelay: '300ms' }}>
-          <div className="flex items-center justify-center h-16 w-16 rounded-full bg-p-green-light mb-4">
+          <div className="flex items-center justify-center h-16 w-16 rounded-full bg-p-green-light mb-4" title="প্রশ্নের উত্তর দিন">
             <ChecklistIcon className="w-8 h-8 text-p-green-dark" />
           </div>
           <h3 className="font-semibold text-text-primary mb-1">১. উত্তর দিন</h3>
@@ -64,7 +66,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart }) => {
         </div>
         {/* Step 2 */}
         <div className="flex flex-col items-center p-4 animate-fade-in" style={{ animationDelay: '500ms' }}>
-          <div className="flex items-center justify-center h-16 w-16 rounded-full bg-s-teal-light mb-4">
+          <div className="flex items-center justify-center h-16 w-16 rounded-full bg-s-teal-light mb-4" title="স্কোর এবং বিশ্লেষণ দেখুন">
             <ChartPieIcon className="w-8 h-8 text-s-teal-dark" />
           </div>
           <h3 className="font-semibold text-text-primary mb-1">২. স্কোর দেখুন</h3>
@@ -74,7 +76,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart }) => {
         </div>
         {/* Step 3 */}
         <div className="flex flex-col items-center p-4 animate-fade-in" style={{ animationDelay: '700ms' }}>
-          <div className="flex items-center justify-center h-16 w-16 rounded-full bg-accent-gold-light mb-4">
+          <div className="flex items-center justify-center h-16 w-16 rounded-full bg-accent-gold-light mb-4" title="ব্যক্তিগতকৃত পরামর্শ নিন">
             <SparklesIcon className="w-8 h-8 text-accent-gold" />
           </div>
           <h3 className="font-semibold text-text-primary mb-1">৩. পরামর্শ নিন</h3>

@@ -12,7 +12,9 @@ export const Header: React.FC = () => {
   return (
     <header className="bg-gradient-to-r from-p-green via-s-teal to-s-teal-dark text-white p-5 sm:p-6 shadow-lg">
       <div className="container mx-auto flex items-center justify-center sm:justify-start space-x-4">
-        <LeafIcon className="w-10 h-10 sm:w-12 sm:h-12 text-p-green-light drop-shadow-md" />
+        <div title="সবুজ ব্যবসার প্রতীক">
+          <LeafIcon className="w-10 h-10 sm:w-12 sm:h-12 text-p-green-light drop-shadow-md" />
+        </div>
         <div>
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
             সবুজ ব্যবসা মূল্যায়ন

@@ -205,7 +205,9 @@ const App: React.FC = () => {
             className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 w-full max-w-2xl rounded-md shadow-soft flex items-start no-print" 
             role="alert"
           >
-            <AlertIcon className="w-6 h-6 mr-3 text-red-500 flex-shrink-0" />
+            <div title="সতর্কতা">
+              <AlertIcon className="w-6 h-6 mr-3 text-red-500 flex-shrink-0" />
+            </div>
             <div>
               <p className="font-bold text-red-700">ত্রুটি</p>
               <p className="text-sm">{error}</p>
