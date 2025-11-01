@@ -1,4 +1,5 @@
 import React from 'react';
+import { toBengaliNumber } from '../utils';
 
 const CertificateLeafIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg 
@@ -69,7 +70,7 @@ export const Certificate: React.FC<CertificateProps> = ({ businessName, percenta
             <div className="bg-p-green-light/20 rounded-lg px-8 py-4">
               <p className="text-lg font-semibold text-gray-700">আপনার সবুজ ব্যবসা স্কোর</p>
               <p className={`text-7xl font-bold ${scoreColorClass}`}>
-                {percentage}<span className="text-4xl text-gray-600">/১০০</span>
+                {toBengaliNumber(percentage)}<span className="text-4xl text-gray-600">/১০০</span>
               </p>
             </div>
           </main>

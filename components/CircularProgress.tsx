@@ -1,4 +1,5 @@
 import React from 'react';
+import { toBengaliNumber } from '../utils';
 
 interface CircularProgressProps {
   percentage: number;
@@ -56,7 +57,7 @@ export const CircularProgress: React.FC<CircularProgressProps> = ({
         />
       </svg>
       <span className={`absolute ${textSizeClass} font-bold ${colorClass}`}>
-        {Math.round(percentage)}%
+        {toBengaliNumber(Math.round(percentage))}%
       </span>
     </div>
   );

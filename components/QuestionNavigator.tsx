@@ -1,6 +1,6 @@
-
 import React from 'react';
 import type { QuestionNavigatorProps } from '../types';
+import { toBengaliNumber } from '../utils';
 
 const ChevronDownIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={className || "w-5 h-5"}>
@@ -40,7 +40,7 @@ export const QuestionNavigator: React.FC<QuestionNavigatorProps> = ({
         >
           {questionNumbers.map((num) => (
             <option key={num} value={num}>
-              প্রশ্ন {num + 1}
+              প্রশ্ন {toBengaliNumber(num + 1)}
             </option>
           ))}
         </select>
@@ -49,7 +49,7 @@ export const QuestionNavigator: React.FC<QuestionNavigatorProps> = ({
         </div>
       </div>
       <p className="text-center text-sm text-text-secondary mt-3 -mb-2">
-        বর্তমান প্রশ্ন: {currentQuestionIndex + 1} / {totalQuestions}
+        বর্তমান প্রশ্ন: {toBengaliNumber(currentQuestionIndex + 1)} / {toBengaliNumber(totalQuestions)}
       </p>
     </div>
   );

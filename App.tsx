@@ -10,7 +10,7 @@ import { QuestionNavigator } from './components/QuestionNavigator';
 import { WelcomeScreen } from './components/WelcomeScreen'; // Import WelcomeScreen
 import { QUESTIONS, MAX_SCORE_PER_QUESTION, QUESTION_WEIGHTS_BY_BUSINESS_TYPE } from './constants';
 import type { Question, Answer, PreAssessmentData } from './types';
-import { getRecommendationsStream } from './services/geminiService';
+import { getRecommendations } from './services/geminiService';
 
 const AlertIcon: React.FC<{ className?: string }> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className || "w-6 h-6"}>
@@ -133,11 +133,11 @@ const App: React.FC = () => {
 
     setIsLoadingRecommendations(true);
     setError(null);
-    setRecommendations(''); // Clear previous recommendations before streaming
+    setRecommendations(''); // Clear previous recommendations before fetching
     try {
       const detailedAnswers = Array.from(currentAnswers.values());
       const percentageScore = currentWeightedMaxScore > 0 ? Math.round((currentWeightedTotalScore / currentWeightedMaxScore) * 100) : 0;
-      const stream = await getRecommendationsStream(
+      const response = await getRecommendations(
         currentWeightedTotalScore, 
         currentWeightedMaxScore,
         percentageScore,
@@ -146,13 +146,11 @@ const App: React.FC = () => {
         apiKeyToUse // Pass the key to the service
       );
       
-      let fullText = '';
-      for await (const chunk of stream) {
-        const chunkText = chunk.text;
-        if (chunkText) {
-          fullText += chunkText;
-          setRecommendations(fullText);
-        }
+      const fullText = response.text;
+      if (fullText) {
+        setRecommendations(fullText);
+      } else {
+        setError("সুপারিশ আনতে ব্যর্থ হয়েছে: জেমিনি থেকে কোনো উত্তর পাওয়া যায়নি।");
       }
 
     } catch (err) {

@@ -1,4 +1,5 @@
 import React from 'react';
+import { toBengaliNumber } from '../utils';
 
 interface ProgressBarProps {
   progress: number;
@@ -10,7 +11,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
     <div className="w-full mb-2 sm:mb-4"> {/* Reduced margin as navigator now shows current question */}
       <div className="flex justify-between mb-1.5">
         <span className="text-xs font-medium text-s-teal-dark">অগ্রগতি</span>
-        <span className="text-xs font-medium text-s-teal-dark">{displayProgress}%</span>
+        <span className="text-xs font-medium text-s-teal-dark">{toBengaliNumber(displayProgress)}%</span>
       </div>
       <div className="w-full bg-border-color rounded-full h-3.5 shadow-inner overflow-hidden">
         <div

@@ -8,6 +8,8 @@ import type { Answer, PreAssessmentData } from '../types';
 import { MAX_SCORE_PER_QUESTION, QUESTION_WEIGHTS_BY_BUSINESS_TYPE } from '../constants'; 
 import { CircularProgress } from './CircularProgress';
 import { Certificate } from './Certificate';
+import { RecommendationLoader } from './RecommendationLoader'; // Import the new loader
+import { toBengaliNumber } from '../utils';
 import { 
   ResourceEfficiencyIcon, 
   WastePollutionIcon, 
@@ -53,24 +55,6 @@ interface ResultsDisplayProps {
   answers: Answer[];
   preAssessmentData: PreAssessmentData | null; 
 }
-
-// Skeleton Loader for Recommendations
-const RecommendationSkeleton: React.FC = () => (
-  <div className="space-y-5 animate-pulse">
-    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-    <div className="space-y-3">
-      <div className="h-3 bg-gray-200 rounded w-full"></div>
-      <div className="h-3 bg-gray-200 rounded w-5/6"></div>
-    </div>
-    <div className="h-4 bg-gray-200 rounded w-1/2 mt-4"></div>
-     <div className="space-y-3">
-      <div className="h-3 bg-gray-200 rounded w-full"></div>
-      <div className="h-3 bg-gray-200 rounded w-4/6"></div>
-      <div className="h-3 bg-gray-200 rounded w-5/6"></div>
-    </div>
-  </div>
-);
-
 
 // Icons for UI elements
 const ScoreTrophyIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -295,14 +279,14 @@ const ResultsContent: React.FC<ResultsDisplayProps & { percentage: number, score
               আপনার সামগ্রিক সবুজ স্কোর
             </p>
             <p className={`text-7xl font-bold my-1 ${scoreColorClass}`}>
-              {animatedScore}<span className="text-4xl text-text-secondary print-text-black">/১০০</span>
+              {toBengaliNumber(animatedScore)}<span className="text-4xl text-text-secondary print-text-black">/১০০</span>
             </p>
             <div className="relative my-4 inline-block circular-progress-print">
               <CircularProgress percentage={percentage} size={160} strokeWidth={16} colorClass={scoreColorClass} />
-              <span className="hidden circular-progress-print-text print-text-black">{percentage}%</span>
+              <span className="hidden circular-progress-print-text print-text-black">{toBengaliNumber(percentage)}%</span>
             </div>
             <p className="text-xs text-text-muted print-text-black mt-1">
-              (ভারযুক্ত স্কোর: {score.toFixed(2)} / {maxPossibleScore.toFixed(2)})
+              (ভারযুক্ত স্কোর: {toBengaliNumber(score.toFixed(2))} / {toBengaliNumber(maxPossibleScore.toFixed(2))})
             </p>
           </div>
           
@@ -318,7 +302,7 @@ const ResultsContent: React.FC<ResultsDisplayProps & { percentage: number, score
                           <div className="flex flex-wrap gap-2">
                               {strengths.map(cat => (
                                   <span key={`strength-${cat.categoryName}`} className="text-sm text-text-secondary print-text-black p-2 bg-p-green-light/40 print-bg-white rounded border border-p-green-light print-border">
-                                      {cat.categoryName} ({cat.percentage}%)
+                                      {cat.categoryName} ({toBengaliNumber(cat.percentage)}%)
                                   </span>
                               ))}
                           </div>
@@ -332,7 +316,7 @@ const ResultsContent: React.FC<ResultsDisplayProps & { percentage: number, score
                           <div className="flex flex-wrap gap-2">
                               {improvements.map(cat => (
                                   <span key={`improve-${cat.categoryName}`} className="text-sm text-text-secondary print-text-black p-2 bg-orange-500/20 print-bg-white rounded border border-orange-500/40 print-border">
-                                      {cat.categoryName} ({cat.percentage}%)
+                                      {cat.categoryName} ({toBengaliNumber(cat.percentage)}%)
                                   </span>
                               ))}
                           </div>
@@ -363,7 +347,7 @@ const ResultsContent: React.FC<ResultsDisplayProps & { percentage: number, score
                           <span className="font-semibold text-md text-s-teal-dark print-text-black">{cat.categoryName}</span>
                         </div>
                         <span className="text-sm text-text-primary print-text-black font-medium bg-disabled-bg print-bg-white px-2.5 py-1 rounded-full">
-                            {cat.percentage}%
+                            {toBengaliNumber(cat.percentage)}%
                         </span>
                       </div>
                       <div className="w-full bg-border-color print-bg-white rounded-full h-2.5 shadow-inner overflow-hidden">
@@ -392,8 +376,7 @@ const ResultsContent: React.FC<ResultsDisplayProps & { percentage: number, score
             </div>
             {isLoadingRecommendations && !recommendations ? (
               <div className="py-5 no-print pdf-hide-on-capture">
-                <RecommendationSkeleton />
-                <p className="text-s-teal-dark text-center mt-6">জেমিনি এআই দিয়ে উপযুক্ত পরামর্শ তৈরি করা হচ্ছে...</p>
+                <RecommendationLoader />
               </div>
             ) : recommendations ? (
               <div className="recommendations-print">
@@ -511,16 +494,17 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = (props) => {
     csvContent += [escapeCsvCell("সামগ্রিক স্কোর"), escapeCsvCell("মোট স্কোর (ভারযুক্ত)"), escapeCsvCell(score.toFixed(2))].join(',') + '\n';
     csvContent += [escapeCsvCell("সামগ্রিক স্কোর"), escapeCsvCell("সর্বোচ্চ সম্ভাব্য স্কোর (ভারযুক্ত)"), escapeCsvCell(maxPossibleScore.toFixed(2))].join(',') + '\n';
     
+    // Fix: Explicitly type the initial value for reduce to ensure correct type inference for `categoryBreakdown`.
+    // This resolves the subsequent errors where properties were being accessed on an 'unknown' type.
     const categoryBreakdown = props.answers.reduce((acc, answer) => {
         if (!acc[answer.category]) {
-            // FIX: Removed unused 'count' property which was causing a TypeScript error.
             acc[answer.category] = { score: 0, maxScore: 0 };
         }
         const weight = QUESTION_WEIGHTS_BY_BUSINESS_TYPE[preAssessmentData.businessType]?.[answer.questionId] ?? 1.0;
         acc[answer.category].score += answer.score * weight;
         acc[answer.category].maxScore += MAX_SCORE_PER_QUESTION * weight;
         return acc;
-    }, {} as Record<string, { score: number, maxScore: number }>);
+    }, {} as Record<string, { score: number; maxScore: number }>);
 
     csvContent += [escapeCsvCell("বিভাগভিত্তিক স্কোর"), escapeCsvCell("বিভাগের নাম"), escapeCsvCell("প্রাপ্ত স্কোর (ভারযুক্ত)"), escapeCsvCell("বিভাগের সর্বোচ্চ স্কোর (ভারযুক্ত)"), escapeCsvCell("শতাংশ")].join(',') + '\n';
     Object.entries(categoryBreakdown).forEach(([category, data]) => {

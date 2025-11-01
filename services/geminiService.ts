@@ -2,7 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import type { Answer, PreAssessmentData } from '../types'; 
 import { MAX_SCORE_PER_QUESTION, QUESTION_WEIGHTS_BY_BUSINESS_TYPE } from '../constants';
 
-export const getRecommendationsStream = async (
+export const getRecommendations = async (
   weightedScore: number, 
   weightedMaxPossibleScore: number,
   percentageScore: number,
@@ -102,7 +102,7 @@ ${improvementAreasSummary}
 `;
 
   try {
-    const response = await ai.models.generateContentStream({
+    const response = await ai.models.generateContent({
       model: model,
       contents: prompt,
        config: {
