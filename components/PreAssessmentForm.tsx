@@ -86,7 +86,7 @@ export const PreAssessmentForm: React.FC<PreAssessmentFormProps> = ({ onSubmit }
   };
 
   const inputBaseClasses = "mt-1 block w-full px-3 py-2.5 bg-bg-offset border border-border-color rounded-md shadow-sm focus:outline-none focus:border-s-teal-dark focus:ring-1 focus:ring-s-teal-dark sm:text-sm text-text-primary";
-  const iconClasses = "absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted group-focus-within:text-s-teal-dark";
+  const iconBaseClasses = "absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-muted transition-all duration-200 ease-in-out group-focus-within:text-s-teal-dark group-focus-within:scale-110";
   const textareaBaseClasses = `${inputBaseClasses} min-h-[80px] resize-y`;
 
 
@@ -113,7 +113,7 @@ export const PreAssessmentForm: React.FC<PreAssessmentFormProps> = ({ onSubmit }
             আপনার ব্যবসার নাম <span className="text-red-500">*</span>
           </label>
           <div className="relative group">
-            <div className={iconClasses}>
+            <div className={iconBaseClasses}>
               <BriefcaseIcon />
             </div>
             <input
@@ -134,7 +134,7 @@ export const PreAssessmentForm: React.FC<PreAssessmentFormProps> = ({ onSubmit }
             ব্যবসার ধরণ
           </label>
            <div className="relative group">
-             <div className={iconClasses}>
+             <div className={iconBaseClasses}>
                 <TagIcon className="w-5 h-5"/>
              </div>
             <select
@@ -160,7 +160,7 @@ export const PreAssessmentForm: React.FC<PreAssessmentFormProps> = ({ onSubmit }
             আপনার ব্যবসার অবস্থান
           </label>
           <div className="relative group">
-            <div className={iconClasses}>
+            <div className={iconBaseClasses}>
                 <MapPinIcon/>
             </div>
             <select
@@ -186,7 +186,7 @@ export const PreAssessmentForm: React.FC<PreAssessmentFormProps> = ({ onSubmit }
             আপনার ব্যবসার কর্মী সংখ্যা কত?
           </label>
           <div className="relative group">
-            <div className={iconClasses}>
+            <div className={iconBaseClasses}>
                 <UserGroupIcon/>
             </div>
             <select
@@ -212,7 +212,7 @@ export const PreAssessmentForm: React.FC<PreAssessmentFormProps> = ({ onSubmit }
             আপনার ব্যবসার সংক্ষিপ্ত বিবরণ (ঐচ্ছিক)
           </label>
           <div className="relative group">
-            <div className={`${iconClasses} top-3 transform-none`}>
+            <div className={`${iconBaseClasses} top-3 transform-none`}>
                  <InformationCircleIcon />
             </div>
             <textarea
@@ -231,7 +231,7 @@ export const PreAssessmentForm: React.FC<PreAssessmentFormProps> = ({ onSubmit }
             আপনার ব্যবসার প্রধান পরিবেশগত চ্যালেঞ্জ অথবা আপনি কোন সবুজ উদ্যোগ নিতে সবচেয়ে বেশি আগ্রহী? (ঐচ্ছিক)
           </label>
           <div className="relative group">
-            <div className={`${iconClasses} top-3 transform-none`}>
+            <div className={`${iconBaseClasses} top-3 transform-none`}>
                  <ChatBubbleIcon />
             </div>
             <textarea

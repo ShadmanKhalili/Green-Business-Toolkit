@@ -52,6 +52,10 @@
               'fade-in': 'fadeIn 0.5s ease-out',
               'slide-in-up': 'slideInUp 0.5s ease-out',
               'subtle-beat': 'subtleBeat 1.5s infinite ease-in-out',
+              'blob-move-1': 'blobMove1 30s infinite alternate ease-in-out',
+              'blob-move-2': 'blobMove2 35s infinite alternate ease-in-out',
+              'blob-move-3': 'blobMove3 40s infinite alternate ease-in-out',
+              'slide-fade-in': 'slideAndFadeIn 0.6s ease-out forwards',
             },
             keyframes: {
               fadeIn: {
@@ -62,10 +66,29 @@
                 '0%': { transform: 'translateY(20px)', opacity: 0 },
                 '100%': { transform: 'translateY(0)', opacity: 1 },
               },
+              slideAndFadeIn: {
+                '0%': { transform: 'translateY(20px)', opacity: 0 },
+                '100%': { transform: 'translateY(0)', opacity: 1 },
+              },
               subtleBeat: {
                 '0%, 100%': { transform: 'scale(1)' },
                 '50%': { transform: 'scale(1.03)' },
-              }
+              },
+              blobMove1: {
+                '0%': { transform: 'translate(0, 0) scale(1)' },
+                '50%': { transform: 'translate(10vw, -15vh) scale(1.2)' },
+                '100%': { transform: 'translate(-5vw, 10vh) scale(0.9)' },
+              },
+              blobMove2: {
+                '0%': { transform: 'translate(0, 0) scale(1)' },
+                '50%': { transform: 'translate(-12vw, 10vh) scale(0.8)' },
+                '100%': { transform: 'translate(8vw, -5vh) scale(1.1)' },
+              },
+              blobMove3: {
+                '0%': { transform: 'translate(0, 0) scale(1)' },
+                '50%': { transform: 'translate(5vw, 15vh) scale(1.1)' },
+                '100%': { transform: 'translate(-10vw, -10vh) scale(1)' },
+              },
             }
           }
         }
@@ -77,6 +100,7 @@
     "react/": "https://esm.sh/react@^19.1.0/",
     "react": "https://esm.sh/react@^19.1.0",
     "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react-dom": "https://esm.sh/react-dom@^19.1.0",
     "@google/genai": "https://esm.sh/@google/genai@^1.0.1",
     "jspdf": "https://esm.sh/jspdf@2.5.1",
     "html2canvas": "https://esm.sh/html2canvas@1.4.1"
@@ -133,6 +157,20 @@
       font-size: 1.5rem;
       font-weight: bold;
     }
+  .pdf-page-break {
+    page-break-after: always;
+  }
+
+  /* Utility classes for animation delays */
+  .animation-delay-100 { animation-delay: 100ms; }
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
+  .animation-delay-400 { animation-delay: 400ms; }
+  .animation-delay-500 { animation-delay: 500ms; }
+  
+  .animated-component {
+    opacity: 0; /* Start hidden for animation */
+  }
 
   @media print {
     body {
@@ -219,7 +257,7 @@
   }
 </style>
 </head>
-  <body class="font-sans bg-bg-main text-text-primary antialiased">
+  <body class="font-sans bg-bg-main text-text-primary antialiased overflow-x-hidden">
     <noscript>এই অ্যাপটি চালাতে আপনার জাভাস্ক্রিপ্ট সক্রিয় করতে হবে।</noscript>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>

@@ -18,7 +18,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({ question, onAnswer, 
          <span className="bg-s-teal text-white px-3 py-1 rounded-full text-xs font-semibold inline-block mb-2 shadow-sm">
            {question.category}
          </span>
-         <h2 className="text-lg sm:text-xl font-semibold text-text-primary leading-tight">{question.text}</h2>
+         <h2 className="text-lg sm:text-xl font-semibold text-text-primary leading-tight animate-fade-in animation-delay-100">{question.text}</h2>
       </div>
      
       <div className="space-y-3">

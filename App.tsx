@@ -18,6 +18,14 @@ const AlertIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
+const AnimatedBackground: React.FC = () => (
+  <div className="fixed top-0 left-0 w-full h-full -z-10 overflow-hidden bg-bg-main">
+    <div className="absolute top-[10vh] left-[5vw] w-[30vw] h-[30vw] bg-p-green-light/30 rounded-full filter blur-3xl opacity-50 animate-blob-move-1"></div>
+    <div className="absolute top-[40vh] right-[10vw] w-[25vw] h-[25vw] bg-s-teal-light/30 rounded-full filter blur-3xl opacity-50 animate-blob-move-2"></div>
+    <div className="absolute bottom-[5vh] left-[20vw] w-[20vw] h-[20vw] bg-accent-gold-light/30 rounded-full filter blur-3xl opacity-50 animate-blob-move-3"></div>
+  </div>
+);
+
 
 const App: React.FC = () => {
   const [showWelcomeScreen, setShowWelcomeScreen] = useState<boolean>(true); 
@@ -190,7 +198,8 @@ const App: React.FC = () => {
   const progress = isPreAssessmentDone ? ((currentQuestionIndex + 1) / QUESTIONS.length) * 100 : 0;
 
   return (
-    <div className="min-h-screen flex flex-col bg-bg-main">
+    <div className="min-h-screen flex flex-col bg-transparent relative isolate">
+      <AnimatedBackground />
       <Header />
       <main className="flex-grow container mx-auto p-4 sm:p-6 md:p-8 flex flex-col items-center justify-center animate-fadeIn">
         {error && (

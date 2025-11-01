@@ -1,4 +1,5 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { LoadingSpinner } from './LoadingSpinner';
@@ -6,6 +7,7 @@ import { QuestionCategory } from '../types';
 import type { Answer, PreAssessmentData } from '../types'; 
 import { MAX_SCORE_PER_QUESTION, QUESTION_WEIGHTS_BY_BUSINESS_TYPE } from '../constants'; 
 import { CircularProgress } from './CircularProgress';
+import { Certificate } from './Certificate';
 import { 
   ResourceEfficiencyIcon, 
   WastePollutionIcon, 
@@ -14,6 +16,33 @@ import {
   BusinessManagementIcon,
   SparklesIcon,
 } from './CategoryIcons';
+
+// Custom hook for animating number count-up effect
+const useCountUp = (end: number, duration: number = 1500) => {
+  const [count, setCount] = useState(0);
+  const frameRate = 1000 / 60; // 60fps
+  const totalFrames = Math.round(duration / frameRate);
+  
+  useEffect(() => {
+    let frame = 0;
+    const counter = setInterval(() => {
+      frame++;
+      const progress = frame / totalFrames;
+      const currentCount = Math.round(end * progress);
+      setCount(currentCount);
+      
+      if (frame === totalFrames) {
+        clearInterval(counter);
+        setCount(end); // Ensure it ends on the exact number
+      }
+    }, frameRate);
+
+    return () => clearInterval(counter);
+  }, [end, duration, totalFrames, frameRate]);
+
+  return count;
+};
+
 
 interface ResultsDisplayProps {
   score: number; // This will be the weighted total score
@@ -202,25 +231,17 @@ const sanitizeFilenamePart = (name: string | undefined | null): string => {
     .replace(/[^\w\u0980-\u09FF.-]/g, ''); // Keep word chars (alphanumeric + _), Bengali, dot, hyphen
 };
 
-
-export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
-  score, // weightedTotalScore
-  maxPossibleScore, // weightedMaxPossibleScore
+const ResultsContent: React.FC<ResultsDisplayProps & { percentage: number, scoreColorClass: string }> = ({
+  score,
+  maxPossibleScore,
   recommendations,
   isLoadingRecommendations,
-  onRestart,
   answers,
-  preAssessmentData 
+  preAssessmentData,
+  percentage,
+  scoreColorClass,
 }) => {
-  const resultsRef = useRef<HTMLDivElement>(null);
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-  
-  const percentage = maxPossibleScore > 0 ? Math.round((score / maxPossibleScore) * 100) : 0;
-  
-  let scoreColorClass = 'text-red-500 print-text-black';
-  if (percentage >= 75) scoreColorClass = 'text-p-green print-text-black';
-  else if (percentage >= 50) scoreColorClass = 'text-yellow-500 print-text-black';
-  else if (percentage >= 25) scoreColorClass = 'text-orange-500 print-text-black';
+  const animatedScore = useCountUp(percentage);
 
   const getCategoryScores = () => {
     if (!preAssessmentData) return [];
@@ -248,75 +269,221 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
   const categoryBreakdown = getCategoryScores();
   const strengths = categoryBreakdown.filter(cat => cat.percentage >= 70);
   const improvements = categoryBreakdown.filter(cat => cat.percentage < 60);
+
+  return (
+    <div className="bg-bg-offset p-6 sm:p-8 md:p-10 rounded-xl shadow-soft-lg results-display-container">
+      {/* --- HEADER --- */}
+      <div className="text-center border-b-2 border-border-color pb-6 mb-8 animated-component animate-slide-fade-in">
+        <ScoreTrophyIcon className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 ${scoreColorClass}`} />
+        <h2 className="text-3xl sm:text-4xl font-bold text-text-primary print-text-black mb-2">আপনার মূল্যায়ন ফলাফল</h2>
+        <p className="text-md sm:text-lg text-text-secondary print-text-black">আপনার ব্যবসার সবুজ পারফরম্যান্সের একটি সার্বিক চিত্র।</p>
+        {preAssessmentData && (
+            <p className="text-xs sm:text-sm text-text-secondary print-text-black mt-4 bg-disabled-bg print-bg-white px-3 py-1.5 rounded-full inline-block">
+              <strong>ব্যবসা:</strong> {preAssessmentData.businessName} ({preAssessmentData.businessType}, {preAssessmentData.location})
+            </p>
+        )}
+      </div>
+
+      {/* --- MAIN CONTENT GRID --- */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* --- LEFT COLUMN: SCORE & INSIGHTS --- */}
+        <div className="lg:col-span-1 space-y-8">
+          {/* --- SCORE SUMMARY BLOCK --- */}
+          <div className="bg-gradient-to-br from-s-teal-light/20 to-p-green-light/20 print-bg-white p-6 rounded-lg shadow-soft print-no-shadow print-border text-center animated-component animate-slide-fade-in animation-delay-100">
+            <p className="text-xl text-s-teal-dark print-text-black font-semibold mb-2">
+              আপনার সামগ্রিক সবুজ স্কোর
+            </p>
+            <p className={`text-7xl font-bold my-1 ${scoreColorClass}`}>
+              {animatedScore}<span className="text-4xl text-text-secondary print-text-black">/১০০</span>
+            </p>
+            <div className="relative my-4 inline-block circular-progress-print">
+              <CircularProgress percentage={percentage} size={160} strokeWidth={16} colorClass={scoreColorClass} />
+              <span className="hidden circular-progress-print-text print-text-black">{percentage}%</span>
+            </div>
+            <p className="text-xs text-text-muted print-text-black mt-1">
+              (ভারযুক্ত স্কোর: {score.toFixed(2)} / {maxPossibleScore.toFixed(2)})
+            </p>
+          </div>
+          
+          {/* --- KEY INSIGHTS (STRENGTHS & IMPROVEMENTS) --- */}
+          <div className="text-left p-6 bg-bg-main print-bg-white rounded-lg shadow-soft print-no-shadow print-border animated-component animate-slide-fade-in animation-delay-200">
+              <h3 className="text-xl font-semibold text-text-primary print-text-black mb-5 text-center">একনজরে আপনার ফলাফল</h3>
+              <div className="space-y-6">
+                  {strengths.length > 0 && (
+                      <div className="print-break-inside-avoid">
+                          <h4 className="text-lg font-semibold text-p-green print-text-black mb-3 flex items-center">
+                              <TrendingUpIcon className="w-6 h-6 mr-2.5"/> আপনার সাফল্যের ক্ষেত্র
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                              {strengths.map(cat => (
+                                  <span key={`strength-${cat.categoryName}`} className="text-sm text-text-secondary print-text-black p-2 bg-p-green-light/40 print-bg-white rounded border border-p-green-light print-border">
+                                      {cat.categoryName} ({cat.percentage}%)
+                                  </span>
+                              ))}
+                          </div>
+                      </div>
+                  )}
+                  {improvements.length > 0 && (
+                      <div className="print-break-inside-avoid">
+                          <h4 className="text-lg font-semibold text-orange-500 print-text-black mb-3 flex items-center">
+                              <WrenchScrewdriverIcon className="w-6 h-6 mr-2.5"/> উন্নতির সেরা সুযোগ
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                              {improvements.map(cat => (
+                                  <span key={`improve-${cat.categoryName}`} className="text-sm text-text-secondary print-text-black p-2 bg-orange-500/20 print-bg-white rounded border border-orange-500/40 print-border">
+                                      {cat.categoryName} ({cat.percentage}%)
+                                  </span>
+                              ))}
+                          </div>
+                      </div>
+                  )}
+                  {strengths.length === 0 && improvements.length === 0 && (
+                      <p className="text-text-secondary print-text-black text-center py-4">কোনো নির্দিষ্ট শক্তিশালী দিক বা উন্নতির সুযোগ চিহ্নিত করা যায়নি।</p>
+                  )}
+              </div>
+          </div>
+        </div>
+        
+        {/* --- RIGHT COLUMN: DETAILS & RECOMMENDATIONS --- */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* --- DETAILED BREAKDOWN --- */}
+          <div className="text-left print-break-inside-avoid animated-component animate-slide-fade-in animation-delay-300">
+            <h3 className="text-xl font-semibold text-text-primary print-text-black mb-4">বিভাগভিত্তিক বিস্তারিত স্কোর</h3>
+            <div className="space-y-4">
+              {categoryBreakdown.map(cat => {
+                const performanceColor = cat.percentage >= 70 ? 'bg-p-green' : cat.percentage >= 40 ? 'bg-yellow-400' : 'bg-red-400';
+                return (
+                  <div key={cat.categoryName} className="p-4 bg-bg-main print-bg-white rounded-lg border border-border-color print-border shadow-soft print-no-shadow transition-all hover:shadow-soft-lg flex items-start space-x-4">
+                    <div className={`w-1.5 h-auto self-stretch rounded-full ${performanceColor}`}></div>
+                    <div className="flex-grow">
+                      <div className="flex items-center mb-2">
+                        {getCategoryIcon(cat.categoryName)}
+                        <div className="flex-grow">
+                          <span className="font-semibold text-md text-s-teal-dark print-text-black">{cat.categoryName}</span>
+                        </div>
+                        <span className="text-sm text-text-primary print-text-black font-medium bg-disabled-bg print-bg-white px-2.5 py-1 rounded-full">
+                            {cat.percentage}%
+                        </span>
+                      </div>
+                      <div className="w-full bg-border-color print-bg-white rounded-full h-2.5 shadow-inner overflow-hidden">
+                        <div 
+                          className={`h-2.5 rounded-full transition-all duration-700 ease-out ${performanceColor}`} 
+                          style={{ width: `${cat.percentage}%` }}
+                          role="progressbar"
+                          aria-valuenow={cat.percentage}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-label={`${cat.categoryName} অগ্রগতি ${cat.percentage}%`}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* --- RECOMMENDATIONS --- */}
+          <div className="bg-bg-main print-bg-white p-6 sm:p-8 rounded-xl text-left shadow-soft print-no-shadow print-border print-break-inside-avoid animated-component animate-slide-fade-in animation-delay-400">
+            <div className="flex items-center mb-5">
+              <RecommendationsIcon className="w-8 h-8 text-s-teal-dark print-text-black mr-3 flex-shrink-0" />
+              <h3 className="text-xl font-semibold text-text-primary print-text-black">আপনার জন্য ব্যক্তিগতকৃত সুপারিশ</h3>
+            </div>
+            {isLoadingRecommendations && !recommendations ? (
+              <div className="py-5 no-print pdf-hide-on-capture">
+                <RecommendationSkeleton />
+                <p className="text-s-teal-dark text-center mt-6">জেমিনি এআই দিয়ে উপযুক্ত পরামর্শ তৈরি করা হচ্ছে...</p>
+              </div>
+            ) : recommendations ? (
+              <div className="recommendations-print">
+                {renderRecommendations(recommendations)}
+              </div>
+            ) : (
+              <p className="text-text-secondary print-text-black">এই মুহূর্তে কোনো সুপারিশ উপলব্ধ নেই। অনুগ্রহ করে পরে আবার চেষ্টা করুন।</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+export const ResultsDisplay: React.FC<ResultsDisplayProps> = (props) => {
+  const {
+    score,
+    maxPossibleScore,
+    onRestart,
+    preAssessmentData,
+  } = props;
+  
+  const pdfContentRef = useRef<HTMLDivElement>(null);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  
+  const percentage = maxPossibleScore > 0 ? Math.round((score / maxPossibleScore) * 100) : 0;
+  
+  let scoreColorClass = 'text-red-500 print-text-black';
+  if (percentage >= 75) scoreColorClass = 'text-p-green print-text-black';
+  else if (percentage >= 50) scoreColorClass = 'text-yellow-500 print-text-black';
+  else if (percentage >= 25) scoreColorClass = 'text-orange-500 print-text-black';
   
   const handleDownloadPDF = async () => {
-    if (!resultsRef.current) return;
     setIsGeneratingPdf(true);
     
-    const originalStyles: {element: HTMLElement, styleName: string, originalValue: string}[] = [];
-    const captureElement = resultsRef.current;
-
-    captureElement.classList.add('pdf-capture-mode');
-    const elementsToForceWhiteBG = captureElement.querySelectorAll('.bg-gradient-to-r, .bg-bg-main, .bg-disabled-bg, .bg-p-green-light, .bg-s-teal-light');
-    elementsToForceWhiteBG.forEach(el => {
-        const htmlEl = el as HTMLElement;
-        originalStyles.push({element: htmlEl, styleName: 'backgroundColor', originalValue: htmlEl.style.backgroundColor});
-        htmlEl.style.backgroundColor = '#ffffff';
-    });
-
-    try {
-      const canvas = await html2canvas(captureElement, { 
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        onclone: (document) => {
-          const elementsToHideInPdf = document.querySelectorAll('.pdf-hide-on-capture');
-          elementsToHideInPdf.forEach(el => (el as HTMLElement).style.display = 'none');
-          const svgTextFallbacks = document.querySelectorAll('.circular-progress-print-text');
-          svgTextFallbacks.forEach(el => (el as HTMLElement).style.display = 'block');
-          const svgElements = document.querySelectorAll('.circular-progress-print svg');
-          svgElements.forEach(el => (el as HTMLElement).style.display = 'none');
-        }
-      });
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfPageWidth = pdf.internal.pageSize.getWidth();
-      const pdfPageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 10; 
-
-      const imgProps= pdf.getImageProperties(imgData);
-      const canvasWidth = imgProps.width;
-      const canvasHeight = imgProps.height;
-
-      const availableWidth = pdfPageWidth - 2 * margin;
-      const scaleRatio = availableWidth / canvasWidth;
-      const scaledCanvasHeight = canvasHeight * scaleRatio;
-      
-      let position = 0;
-      while (position < scaledCanvasHeight) {
-        const pageImageHeight = Math.min(pdfPageHeight - 2 * margin, scaledCanvasHeight - position);
-        pdf.addImage(imgData, 'PNG', margin, margin - position, availableWidth, scaledCanvasHeight);
-        position += (pdfPageHeight - 2 * margin);
-        if (position < scaledCanvasHeight) {
-          pdf.addPage();
-        }
+    setTimeout(async () => {
+      const captureElement = pdfContentRef.current;
+      if (!captureElement) {
+        console.error("PDF content element not found.");
+        setIsGeneratingPdf(false);
+        return;
       }
-      
-      const sanitizedBusinessName = sanitizeFilenamePart(preAssessmentData?.businessName);
-      const sanitizedLocation = sanitizeFilenamePart(preAssessmentData?.location);
-      pdf.save(`সবুজ_ব্যবসা_ফলাফল_${sanitizedBusinessName}_${sanitizedLocation}.pdf`);
+    
+      try {
+        const canvas = await html2canvas(captureElement, { 
+          scale: 1.5,
+          useCORS: true,
+          logging: false,
+        });
 
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      alert("পিডিএফ তৈরি করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।");
-    } finally {
-      captureElement.classList.remove('pdf-capture-mode');
-      originalStyles.forEach(s => (s.element.style as any)[s.styleName] = s.originalValue);
-      setIsGeneratingPdf(false);
-    }
+        const imgData = canvas.toDataURL('image/jpeg', 0.9);
+        const pdf = new jsPDF('l', 'mm', 'a4');
+        const pdfPageWidth = pdf.internal.pageSize.getWidth();
+        const pdfPageHeight = pdf.internal.pageSize.getHeight();
+        
+        const imgProps= pdf.getImageProperties(imgData);
+        const canvasWidth = imgProps.width;
+        const canvasHeight = imgProps.height;
+
+        const ratio = canvasHeight / canvasWidth;
+        let position = 0;
+        const pageHeight = pdfPageWidth * ratio; 
+        
+        let heightLeft = pageHeight;
+        
+        pdf.addImage(imgData, 'JPEG', 0, position, pdfPageWidth, pageHeight);
+        heightLeft -= pdfPageHeight;
+
+        while (heightLeft > 0) {
+          position = heightLeft - pageHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', 0, position, pdfPageWidth, pageHeight);
+          heightLeft -= pdfPageHeight;
+        }
+
+        const sanitizedBusinessName = sanitizeFilenamePart(preAssessmentData?.businessName);
+        const sanitizedLocation = sanitizeFilenamePart(preAssessmentData?.location);
+        pdf.save(`সবুজ_ব্যবসা_ফলাফল_${sanitizedBusinessName}_${sanitizedLocation}.pdf`);
+
+      } catch (error) {
+        console.error("Error generating PDF:", error);
+        alert("পিডিএফ তৈরি করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।");
+      } finally {
+        setIsGeneratingPdf(false);
+      }
+    }, 100); // Timeout to allow React to render the off-screen component
   };
-
+  
   const handleDownloadCSV = () => {
     if (!preAssessmentData) return;
 
@@ -344,19 +511,31 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
     csvContent += [escapeCsvCell("সামগ্রিক স্কোর"), escapeCsvCell("মোট স্কোর (ভারযুক্ত)"), escapeCsvCell(score.toFixed(2))].join(',') + '\n';
     csvContent += [escapeCsvCell("সামগ্রিক স্কোর"), escapeCsvCell("সর্বোচ্চ সম্ভাব্য স্কোর (ভারযুক্ত)"), escapeCsvCell(maxPossibleScore.toFixed(2))].join(',') + '\n';
     
+    const categoryBreakdown = props.answers.reduce((acc, answer) => {
+        if (!acc[answer.category]) {
+            // FIX: Removed unused 'count' property which was causing a TypeScript error.
+            acc[answer.category] = { score: 0, maxScore: 0 };
+        }
+        const weight = QUESTION_WEIGHTS_BY_BUSINESS_TYPE[preAssessmentData.businessType]?.[answer.questionId] ?? 1.0;
+        acc[answer.category].score += answer.score * weight;
+        acc[answer.category].maxScore += MAX_SCORE_PER_QUESTION * weight;
+        return acc;
+    }, {} as Record<string, { score: number, maxScore: number }>);
+
     csvContent += [escapeCsvCell("বিভাগভিত্তিক স্কোর"), escapeCsvCell("বিভাগের নাম"), escapeCsvCell("প্রাপ্ত স্কোর (ভারযুক্ত)"), escapeCsvCell("বিভাগের সর্বোচ্চ স্কোর (ভারযুক্ত)"), escapeCsvCell("শতাংশ")].join(',') + '\n';
-    categoryBreakdown.forEach(cat => {
+    Object.entries(categoryBreakdown).forEach(([category, data]) => {
+      const catPercentage = data.maxScore > 0 ? Math.round((data.score / data.maxScore) * 100) : 0;
       csvContent += [
         escapeCsvCell("বিভাগভিত্তিক স্কোর"), 
-        escapeCsvCell(cat.categoryName), 
-        escapeCsvCell(cat.score.toFixed(2)), 
-        escapeCsvCell(cat.maxScore.toFixed(2)), 
-        escapeCsvCell(cat.percentage + "%")
+        escapeCsvCell(category), 
+        escapeCsvCell(data.score.toFixed(2)), 
+        escapeCsvCell(data.maxScore.toFixed(2)), 
+        escapeCsvCell(catPercentage + "%")
       ].join(',') + '\n';
     });
 
     csvContent += [escapeCsvCell("প্রশ্নের উত্তর"), escapeCsvCell("প্রশ্ন"), escapeCsvCell("বিভাগ"), escapeCsvCell("উত্তর (স্কোর)"), escapeCsvCell("ওজন (Weight)")].join(',') + '\n';
-     answers.forEach(ans => {
+     props.answers.forEach(ans => {
       const businessTypeWeights = QUESTION_WEIGHTS_BY_BUSINESS_TYPE[preAssessmentData.businessType];
       const weight = businessTypeWeights?.[ans.questionId] ?? 1.0;
       csvContent += [
@@ -368,7 +547,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
       ].join(',') + '\n';
     });
 
-    const formattedRecommendations = recommendations.replace(/\n\n+/g, " || ").replace(/\n/g, " ; ");
+    const formattedRecommendations = props.recommendations.replace(/\n\n+/g, " || ").replace(/\n/g, " ; ");
     csvContent += [escapeCsvCell("ব্যক্তিগতকৃত সুপারিশ"), escapeCsvCell("সুপারিশ (Recommendations)"), escapeCsvCell(formattedRecommendations)].join(',') + '\n';
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -391,179 +570,65 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
   const iconSizeClass = "w-6 h-6 mr-2 sm:mr-2.5";
 
   return (
-    <div className="w-full max-w-6xl animate-slideInUp print-container">
-      <div ref={resultsRef} className="bg-bg-offset p-6 sm:p-8 md:p-10 rounded-xl shadow-soft-lg results-display-container">
-        {/* --- HEADER --- */}
-        <div className="text-center border-b-2 border-border-color pb-6 mb-8">
-          <ScoreTrophyIcon className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 ${scoreColorClass}`} />
-          <h2 className="text-3xl sm:text-4xl font-bold text-text-primary print-text-black mb-2">আপনার মূল্যায়ন ফলাফল</h2>
-          <p className="text-md sm:text-lg text-text-secondary print-text-black">আপনার ব্যবসার সবুজ পারফরম্যান্সের একটি সার্বিক চিত্র।</p>
-          {preAssessmentData && (
-              <p className="text-xs sm:text-sm text-text-secondary print-text-black mt-4 bg-disabled-bg print-bg-white px-3 py-1.5 rounded-full inline-block">
-                <strong>ব্যবসা:</strong> {preAssessmentData.businessName} ({preAssessmentData.businessType}, {preAssessmentData.location})
-              </p>
-          )}
-        </div>
-
-        {/* --- MAIN CONTENT GRID --- */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* --- LEFT COLUMN: SCORE & INSIGHTS --- */}
-          <div className="lg:col-span-1 space-y-8">
-            {/* --- SCORE SUMMARY BLOCK --- */}
-            <div className="bg-gradient-to-br from-s-teal-light/20 to-p-green-light/20 print-bg-white p-6 rounded-lg shadow-soft print-no-shadow print-border text-center">
-              <p className="text-xl text-s-teal-dark print-text-black font-semibold mb-2">
-                আপনার সামগ্রিক সবুজ স্কোর
-              </p>
-              <p className={`text-7xl font-bold my-1 ${scoreColorClass}`}>
-                {percentage}<span className="text-4xl text-text-secondary print-text-black">/১০০</span>
-              </p>
-              <div className="relative my-4 inline-block animate-subtle-beat circular-progress-print">
-                <CircularProgress percentage={percentage} size={160} strokeWidth={16} colorClass={scoreColorClass} />
-                <span className="hidden circular-progress-print-text print-text-black">{percentage}%</span>
-              </div>
-              <p className="text-xs text-text-muted print-text-black mt-1">
-                (ভারযুক্ত স্কোর: {score.toFixed(2)} / {maxPossibleScore.toFixed(2)})
-              </p>
-            </div>
-            
-            {/* --- KEY INSIGHTS (STRENGTHS & IMPROVEMENTS) --- */}
-            <div className="text-left p-6 bg-bg-main print-bg-white rounded-lg shadow-soft print-no-shadow print-border">
-                <h3 className="text-xl font-semibold text-text-primary print-text-black mb-5 text-center">একনজরে আপনার ফলাফল</h3>
-                <div className="space-y-6">
-                    {strengths.length > 0 && (
-                        <div className="print-break-inside-avoid">
-                            <h4 className="text-lg font-semibold text-p-green print-text-black mb-3 flex items-center">
-                                <TrendingUpIcon className="w-6 h-6 mr-2.5"/> আপনার সাফল্যের ক্ষেত্র
-                            </h4>
-                            <div className="flex flex-wrap gap-2">
-                                {strengths.map(cat => (
-                                    <span key={`strength-${cat.categoryName}`} className="text-sm text-text-secondary print-text-black p-2 bg-p-green-light/40 print-bg-white rounded border border-p-green-light print-border">
-                                        {cat.categoryName} ({cat.percentage}%)
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                    {improvements.length > 0 && (
-                        <div className="print-break-inside-avoid">
-                            <h4 className="text-lg font-semibold text-orange-500 print-text-black mb-3 flex items-center">
-                                <WrenchScrewdriverIcon className="w-6 h-6 mr-2.5"/> উন্নতির সেরা সুযোগ
-                            </h4>
-                            <div className="flex flex-wrap gap-2">
-                                {improvements.map(cat => (
-                                    <span key={`improve-${cat.categoryName}`} className="text-sm text-text-secondary print-text-black p-2 bg-orange-500/20 print-bg-white rounded border border-orange-500/40 print-border">
-                                        {cat.categoryName} ({cat.percentage}%)
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                    {strengths.length === 0 && improvements.length === 0 && (
-                        <p className="text-text-secondary print-text-black text-center py-4">কোনো নির্দিষ্ট শক্তিশালী দিক বা উন্নতির সুযোগ চিহ্নিত করা যায়নি।</p>
-                    )}
-                </div>
-            </div>
-          </div>
-          
-          {/* --- RIGHT COLUMN: DETAILS & RECOMMENDATIONS --- */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* --- DETAILED BREAKDOWN --- */}
-            <div className="text-left print-break-inside-avoid">
-              <h3 className="text-xl font-semibold text-text-primary print-text-black mb-4">বিভাগভিত্তিক বিস্তারিত স্কোর</h3>
-              <div className="space-y-4">
-                {categoryBreakdown.map(cat => {
-                  const performanceColor = cat.percentage >= 70 ? 'bg-p-green' : cat.percentage >= 40 ? 'bg-yellow-400' : 'bg-red-400';
-                  return (
-                    <div key={cat.categoryName} className="p-4 bg-bg-main print-bg-white rounded-lg border border-border-color print-border shadow-soft print-no-shadow transition-all hover:shadow-soft-lg flex items-start space-x-4">
-                      <div className={`w-1.5 h-auto self-stretch rounded-full ${performanceColor}`}></div>
-                      <div className="flex-grow">
-                        <div className="flex items-center mb-2">
-                          {getCategoryIcon(cat.categoryName)}
-                          <div className="flex-grow">
-                            <span className="font-semibold text-md text-s-teal-dark print-text-black">{cat.categoryName}</span>
-                          </div>
-                          <span className="text-sm text-text-primary print-text-black font-medium bg-disabled-bg print-bg-white px-2.5 py-1 rounded-full">
-                              {cat.percentage}%
-                          </span>
-                        </div>
-                        <div className="w-full bg-border-color print-bg-white rounded-full h-2.5 shadow-inner overflow-hidden">
-                          <div 
-                            className={`h-2.5 rounded-full transition-all duration-700 ease-out ${performanceColor}`} 
-                            style={{ width: `${cat.percentage}%` }}
-                            role="progressbar"
-                            aria-valuenow={cat.percentage}
-                            aria-valuemin={0}
-                            aria-valuemax={100}
-                            aria-label={`${cat.categoryName} অগ্রগতি ${cat.percentage}%`}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* --- RECOMMENDATIONS --- */}
-            <div className="bg-bg-main print-bg-white p-6 sm:p-8 rounded-xl text-left shadow-soft print-no-shadow print-border print-break-inside-avoid">
-              <div className="flex items-center mb-5">
-                <RecommendationsIcon className="w-8 h-8 text-s-teal-dark print-text-black mr-3 flex-shrink-0" />
-                <h3 className="text-xl font-semibold text-text-primary print-text-black">আপনার জন্য ব্যক্তিগতকৃত সুপারিশ</h3>
-              </div>
-              {isLoadingRecommendations && !recommendations ? (
-                <div className="py-5 no-print pdf-hide-on-capture">
-                  <RecommendationSkeleton />
-                  <p className="text-s-teal-dark text-center mt-6">জেমিনি এআই দিয়ে উপযুক্ত পরামর্শ তৈরি করা হচ্ছে...</p>
-                </div>
-              ) : recommendations ? (
-                <div className="recommendations-print">
-                  {renderRecommendations(recommendations)}
-                </div>
-              ) : (
-                <p className="text-text-secondary print-text-black">এই মুহূর্তে কোনো সুপারিশ উপলব্ধ নেই। অনুগ্রহ করে পরে আবার চেষ্টা করুন।</p>
-              )}
-            </div>
+    <div className="w-full max-w-6xl print-container">
+      {/* Off-screen container for PDF generation */}
+      {isGeneratingPdf && preAssessmentData && (
+         <div style={{ position: 'absolute', left: '-9999px', top: 0, width: '297mm', backgroundColor: 'white' }}>
+          <div ref={pdfContentRef}>
+            <Certificate 
+              businessName={preAssessmentData.businessName}
+              percentage={percentage}
+              assessmentDate={new Date()}
+            />
+            <div className="pdf-page-break" style={{height: '1px'}}></div>
+            <ResultsContent {...props} percentage={percentage} scoreColorClass={scoreColorClass} />
           </div>
         </div>
-      </div>
-      
-      {/* --- ACTIONS --- */}
-      <div className="mt-8 flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 results-actions-no-print pdf-hide-on-capture">
-        {isGeneratingPdf && (
-          <div className="text-accent-gold flex items-center justify-center py-3 px-6">
-            <LoadingSpinner /> 
-            <span className="ml-2">পিডিএফ তৈরি করা হচ্ছে...</span>
+      )}
+
+      {/* Visible UI */}
+       <div className={`transition-opacity duration-300 ${isGeneratingPdf ? 'opacity-0 invisible' : 'opacity-100 visible'}`}>
+         <ResultsContent {...props} percentage={percentage} scoreColorClass={scoreColorClass} />
+         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 results-actions-no-print pdf-hide-on-capture animated-component animate-slide-fade-in animation-delay-500">
+            <button
+              onClick={handleDownloadPDF}
+              disabled={isGeneratingPdf}
+              className={`${commonButtonClasses} bg-accent-gold hover:bg-yellow-600 focus:ring-accent-gold text-text-primary`}
+              aria-label="ফলাফল পিডিএফ হিসাবে ডাউনলোড করুন"
+            >
+              <ArrowDownTrayIcon className={iconSizeClass} />
+              PDF ডাউনলোড
+            </button>
+            <button
+              onClick={handleDownloadCSV}
+              disabled={isGeneratingPdf}
+              className={`${commonButtonClasses} bg-s-teal hover:bg-s-teal-dark focus:ring-s-teal text-white`}
+              aria-label="বিস্তারিত ডেটা সিএসভি হিসাবে ডাউনলোড করুন"
+            >
+              <ArrowDownTrayIcon className={iconSizeClass} />
+              CSV ডাউনলোড
+            </button>
+            <button
+              onClick={onRestart}
+              disabled={isGeneratingPdf}
+              className={`${commonButtonClasses} bg-p-green-dark hover:bg-green-700 focus:ring-p-green-dark text-white`}
+              aria-label="মূল্যায়ন পুনরায় শুরু করুন"
+            >
+              <RestartIcon className={iconSizeClass} />
+              পুনরায় শুরু
+            </button>
           </div>
-        )}
-        <button
-          onClick={handleDownloadPDF}
-          disabled={isGeneratingPdf}
-          className={`${commonButtonClasses} bg-accent-gold hover:bg-yellow-600 focus:ring-accent-gold text-text-primary`}
-          aria-label="ফলাফল পিডিএফ হিসাবে ডাউনলোড করুন"
-        >
-          <ArrowDownTrayIcon className={iconSizeClass} />
-          ফলাফল (PDF) ডাউনলোড
-        </button>
-        <button
-          onClick={handleDownloadCSV}
-          disabled={isGeneratingPdf}
-          className={`${commonButtonClasses} bg-s-teal hover:bg-s-teal-dark focus:ring-s-teal text-white`}
-          aria-label="বিস্তারিত ডেটা সিএসভি হিসাবে ডাউনলোড করুন"
-        >
-          <ArrowDownTrayIcon className={iconSizeClass} />
-          বিস্তারিত ডেটা (CSV)
-        </button>
-        <button
-          onClick={onRestart}
-          disabled={isGeneratingPdf}
-          className={`${commonButtonClasses} bg-p-green-dark hover:bg-green-700 focus:ring-p-green-dark text-white`}
-          aria-label="মূল্যায়ন পুনরায় শুরু করুন"
-        >
-          <RestartIcon className={iconSizeClass} />
-          পুনরায় শুরু করুন
-        </button>
-      </div>
+       </div>
+
+      {/* Full-screen loader during PDF generation */}
+      {isGeneratingPdf && (
+        <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-50 no-print">
+          <LoadingSpinner />
+          <p className="mt-4 text-lg text-s-teal-dark font-semibold animate-pulse">
+            আপনার সার্টিফিকেট ও ফলাফল প্রস্তুত করা হচ্ছে...
+          </p>
+        </div>
+      )}
     </div>
   );
 };
