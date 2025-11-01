@@ -215,7 +215,7 @@ const sanitizeFilenamePart = (name: string | undefined | null): string => {
     .replace(/[^\w\u0980-\u09FF.-]/g, ''); // Keep word chars (alphanumeric + _), Bengali, dot, hyphen
 };
 
-const ResultsContent: React.FC<ResultsDisplayProps & { percentage: number, scoreColorClass: string }> = ({
+const ResultsContent: React.FC<ResultsDisplayProps & { percentage: number, scoreColorClass: string, isForPdf?: boolean }> = ({
   score,
   maxPossibleScore,
   recommendations,
@@ -224,8 +224,10 @@ const ResultsContent: React.FC<ResultsDisplayProps & { percentage: number, score
   preAssessmentData,
   percentage,
   scoreColorClass,
+  isForPdf = false,
 }) => {
   const animatedScore = useCountUp(percentage);
+  const displayScore = isForPdf ? percentage : animatedScore;
 
   const getCategoryScores = () => {
     if (!preAssessmentData) return [];
@@ -281,7 +283,7 @@ const ResultsContent: React.FC<ResultsDisplayProps & { percentage: number, score
               আপনার সামগ্রিক সবুজ স্কোর
             </p>
             <p className={`text-7xl font-bold my-1 ${scoreColorClass}`}>
-              {toBengaliNumber(animatedScore)}<span className="text-4xl text-text-secondary print-text-black">/১০০</span>
+              {toBengaliNumber(displayScore)}<span className="text-4xl text-text-secondary print-text-black">/১০০</span>
             </p>
             <div className="relative my-4 inline-block circular-progress-print">
               <CircularProgress percentage={percentage} size={160} strokeWidth={16} colorClass={scoreColorClass} />
@@ -435,28 +437,36 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = (props) => {
 
         const imgData = canvas.toDataURL('image/jpeg', 0.9);
         const pdf = new jsPDF('l', 'mm', 'a4');
+        
+        const MARGIN = 10; // 10mm margin on each side
         const pdfPageWidth = pdf.internal.pageSize.getWidth();
         const pdfPageHeight = pdf.internal.pageSize.getHeight();
         
-        const imgProps= pdf.getImageProperties(imgData);
-        const canvasWidth = imgProps.width;
-        const canvasHeight = imgProps.height;
-        const ratio = canvasHeight / canvasWidth;
-        const totalImageHeight = pdfPageWidth * ratio;
-
-        let heightLeft = totalImageHeight;
-        let position = 0;
+        const contentWidth = pdfPageWidth - MARGIN * 2;
+        const contentHeight = pdfPageHeight - MARGIN * 2;
         
-        // Add the first page (which contains the start of the image)
-        pdf.addImage(imgData, 'JPEG', 0, position, pdfPageWidth, totalImageHeight);
-        heightLeft -= pdfPageHeight;
+        const imgProps= pdf.getImageProperties(imgData);
+        const canvasAspectRatio = imgProps.height / imgProps.width;
+        
+        const imageWidthOnPdf = contentWidth;
+        const totalImageHeightOnPdf = imageWidthOnPdf * canvasAspectRatio;
 
-        // Add subsequent pages if the image is taller than one page
-        while (heightLeft > 0) {
-          position -= pdfPageHeight; // Move the image "up" by one page height for the next slice
-          pdf.addPage();
-          pdf.addImage(imgData, 'JPEG', 0, position, pdfPageWidth, totalImageHeight);
-          heightLeft -= pdfPageHeight;
+        let imagePosition = 0;
+        let pageIndex = 0;
+
+        while (imagePosition < totalImageHeightOnPdf) {
+          if (pageIndex > 0) {
+            pdf.addPage();
+          }
+
+          // Calculate the y-coordinate for placing the image.
+          // We shift the entire image up so that the correct "slice" appears within the content area.
+          const yPlacement = MARGIN - imagePosition;
+
+          pdf.addImage(imgData, 'JPEG', MARGIN, yPlacement, imageWidthOnPdf, totalImageHeightOnPdf);
+          
+          imagePosition += contentHeight;
+          pageIndex++;
         }
 
         const sanitizedBusinessName = sanitizeFilenamePart(preAssessmentData?.businessName);
@@ -572,7 +582,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = (props) => {
             />
             <div className="pdf-page-break" style={{height: '1px'}}></div>
             <div className="pdf-capture-mode">
-                <ResultsContent {...props} percentage={percentage} scoreColorClass={scoreColorClass} />
+                <ResultsContent {...props} percentage={percentage} scoreColorClass={scoreColorClass} isForPdf={true} />
             </div>
           </div>
         </div>
