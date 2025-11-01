@@ -498,9 +498,8 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = (props) => {
     csvContent += [escapeCsvCell("সামগ্রিক স্কোর"), escapeCsvCell("মোট স্কোর (ভারযুক্ত)"), escapeCsvCell(score.toFixed(2))].join(',') + '\n';
     csvContent += [escapeCsvCell("সামগ্রিক স্কোর"), escapeCsvCell("সর্বোচ্চ সম্ভাব্য স্কোর (ভারযুক্ত)"), escapeCsvCell(maxPossibleScore.toFixed(2))].join(',') + '\n';
     
-    // Fix: Explicitly provide a generic type to `reduce` to ensure correct type inference for `categoryBreakdown`.
-    // This resolves errors where properties were being accessed on an 'unknown' type inside the subsequent forEach loop.
-    const categoryBreakdown = props.answers.reduce<Record<string, { score: number; maxScore: number }>>((acc, answer) => {
+    // FIX: Explicitly set the type of the initial value for the reduce function to prevent type errors on the `data` object in the subsequent forEach loop.
+    const categoryBreakdown = props.answers.reduce((acc, answer) => {
         if (!acc[answer.category]) {
             acc[answer.category] = { score: 0, maxScore: 0 };
         }
@@ -508,7 +507,7 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = (props) => {
         acc[answer.category].score += answer.score * weight;
         acc[answer.category].maxScore += MAX_SCORE_PER_QUESTION * weight;
         return acc;
-    }, {});
+    }, {} as Record<string, { score: number; maxScore: number }>);
 
     csvContent += [escapeCsvCell("বিভাগভিত্তিক স্কোর"), escapeCsvCell("বিভাগের নাম"), escapeCsvCell("প্রাপ্ত স্কোর (ভারযুক্ত)"), escapeCsvCell("বিভাগের সর্বোচ্চ স্কোর (ভারযুক্ত)"), escapeCsvCell("שতাংশ")].join(',') + '\n';
     Object.entries(categoryBreakdown).forEach(([category, data]) => {

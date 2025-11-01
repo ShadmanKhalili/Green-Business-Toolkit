@@ -7,13 +7,15 @@ export const getRecommendations = async (
   weightedMaxPossibleScore: number,
   percentageScore: number,
   answers: Answer[],
-  preAssessmentData: PreAssessmentData,
-  apiKey: string // Accept API key as a parameter
+  preAssessmentData: PreAssessmentData
 ) => {
+  const apiKey = (process.env as any).API_KEY;
+
   if (!apiKey) {
-    console.error("API_KEY was not provided to the service function.");
-    throw new Error("জেমিনি এর জন্য এপিআই কী অনুপস্থিত। অনুগ্রহ করে আপনার এনভায়রনমেন্ট ভেরিয়েবলে এটি কনফিগার করুন।");
+    console.error("API_KEY is not available in process.env.");
+    throw new Error("ত্রুটি: জেমিনি এপিআই কী অনুপস্থিত। অনুগ্রহ করে নিশ্চিত করুন এটি সঠিকভাবে সেট করা আছে।");
   }
+
   if (!preAssessmentData) {
     throw new Error("ব্যবসার প্রেক্ষাপট তথ্য (preAssessmentData) অনুপস্থিত।");
   }
