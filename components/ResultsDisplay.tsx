@@ -9,6 +9,7 @@ import { MAX_SCORE_PER_QUESTION, QUESTION_WEIGHTS_BY_BUSINESS_TYPE } from '../co
 import { CircularProgress } from './CircularProgress';
 import { Certificate } from './Certificate';
 import { RecommendationLoader } from './RecommendationLoader'; // Import the new loader
+import { BusinessPlanCoCreator } from './BusinessPlanCoCreator'; // Import the new component
 import { toBengaliNumber } from '../utils';
 import { 
   ResourceEfficiencyIcon, 
@@ -405,6 +406,9 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = (props) => {
     maxPossibleScore,
     onRestart,
     preAssessmentData,
+    answers,
+    recommendations,
+    isLoadingRecommendations
   } = props;
   
   const pdfContentRef = useRef<HTMLDivElement>(null);
@@ -626,6 +630,17 @@ export const ResultsDisplay: React.FC<ResultsDisplayProps> = (props) => {
               পুনরায় শুরু
             </button>
           </div>
+
+          {/* --- NEW: Business Plan Co-creator --- */}
+          {!isLoadingRecommendations && preAssessmentData && (
+             <div className="mt-12 animated-component animate-slide-fade-in animation-delay-700">
+               <BusinessPlanCoCreator
+                 preAssessmentData={preAssessmentData}
+                 percentage={percentage}
+                 initialRecommendations={recommendations}
+               />
+             </div>
+          )}
        </div>
 
       {/* Full-screen loader during PDF generation */}

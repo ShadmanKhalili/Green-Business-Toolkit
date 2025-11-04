@@ -1,6 +1,6 @@
 
-import { GoogleGenAI } from "@google/genai";
-import type { Answer, PreAssessmentData } from '../types'; 
+import { GoogleGenAI, Type } from "@google/genai";
+import type { Answer, PreAssessmentData, BusinessPlan } from '../types'; 
 import { MAX_SCORE_PER_QUESTION, QUESTION_WEIGHTS_BY_BUSINESS_TYPE } from '../constants';
 
 export const getRecommendations = async (
@@ -117,5 +117,114 @@ ${improvementAreasSummary}
         throw new Error(`জেমিনি এপিআই অনুরোধ ব্যর্থ হয়েছে: ${error.message}`);
     }
     throw new Error('জেমিনি এপিআই থেকে সুপারিশ আনার সময় একটি অপ্রত্যাশিত ত্রুটি ঘটেছে।');
+  }
+};
+
+
+// --- NEW: Function to generate the Business Plan ---
+export const generateBusinessPlan = async (
+  preAssessmentData: PreAssessmentData,
+  percentageScore: number,
+  initialRecommendations: string
+): Promise<BusinessPlan> => {
+  const apiKey = "AIzaSyBLfNk0Og7RO-Fxl_fuPJJYz7IgNgOWT94";
+  const ai = new GoogleGenAI({ apiKey });
+
+  const businessContext = `
+    - ব্যবসার নাম: ${preAssessmentData.businessName}
+    - ব্যবসার ধরণ: ${preAssessmentData.businessType}
+    - অবস্থান: ${preAssessmentData.location}
+    - কর্মী সংখ্যা: ${preAssessmentData.employeeCount}
+    - ব্যবসার বিবরণ: ${preAssessmentData.businessDescription || 'প্রদান করা হয়নি'}
+    - প্রধান চ্যালেঞ্জ/লক্ষ্য: ${preAssessmentData.mainChallengeOrGoal || 'প্রদান করা হয়নি'}
+  `;
+
+  const prompt = `
+  আপনি বাংলাদেশের উপকূলীয় অঞ্চলের ক্ষুদ্র ব্যবসার জন্য একজন সবুজ প্রবৃদ্ধি কৌশলবিদ। আপনার কাজ হলো একটি ব্যবসাকে তার পরিবেশগত মূল্যায়ন ফলাফলের উপর ভিত্তি করে একটি সহজ, কার্যকরী, এক-পৃষ্ঠার "সবুজ প্রবৃদ্ধি পরিকল্পনা" তৈরি করতে সহায়তা করা।
+
+  ব্যবসার প্রেক্ষাপট:
+  ${businessContext}
+
+  ব্যবসাটি ১০০ এর মধ্যে ${percentageScore} স্কোর করেছে এবং তাদের জন্য নিম্নলিখিত প্রাথমিক সুপারিশগুলি তৈরি করা হয়েছে:
+  ${initialRecommendations}
+
+  আপনার কাজ: উপরের তথ্য ব্যবহার করে, একটি JSON অবজেক্ট তৈরি করুন যা একটি "সবুজ প্রবৃদ্ধি পরিকল্পনা"-কে প্রতিনিধিত্ব করে। পরিকল্পনাটি অবশ্যই বাস্তবসম্মত, অনুপ্রেরণামূলক এবং ব্যবসার নির্দিষ্ট প্রেক্ষাপটের সাথে প্রাসঙ্গিক হতে হবে।
+
+  নির্দেশনা:
+  1.  **planTitle**: একটি অনুপ্রেরণামূলক শিরোনাম তৈরি করুন, যেমন "${preAssessmentData.businessName}-এর টেকসই ভবিষ্যতের রূপরেখা"।
+  2.  **executiveSummary**: ২-৩ বাক্যে একটি সারসংক্ষেপ লিখুন যা ব্যবসার বর্তমান অবস্থা এবং এই পরিকল্পনার উদ্দেশ্য বর্ণনা করে।
+  3.  **goals**: ২-৩টি সুস্পষ্ট, অর্জনযোগ্য সবুজ লক্ষ্য চিহ্নিত করুন। প্রতিটি লক্ষ্যের একটি 'goalTitle' এবং একটি সংক্ষিপ্ত 'description' থাকবে।
+  4.  **actionSteps**: ৩-৪টি বাস্তবসম্মত কর্মপরিকল্পনা তৈরি করুন। প্রতিটি কর্মপরিকল্পনার একটি 'actionTitle', কিছু 'details' এবং একটি বাস্তবসম্মত 'timeline' (যেমন: "১-৩ মাস", "৬ মাস") থাকবে। এগুলি প্রাথমিক সুপারিশ এবং ব্যবসার চ্যালেঞ্জ থেকে অনুপ্রাণিত হওয়া উচিত।
+  5.  **potentialPartners**: ১-২টি সম্ভাব্য অংশীদার বা সহায়তাকারী গোষ্ঠীর প্রকার উল্লেখ করুন। প্রতিটি সঙ্গীর একটি 'partnerType' (যেমন: "স্থানীয় এনজিও", "সরকারি কৃষি অফিস") এবং তারা কীভাবে সহায়তা করতে পারে তার একটি 'description' থাকবে।
+  6.  **estimatedImpact**: ১-২ বাক্যে বর্ণনা করুন যে এই পরিকল্পনা বাস্তবায়ন করা হলে ব্যবসার উপর কী ইতিবাচক পরিবেশগত এবং আর্থিক প্রভাব পড়তে পারে।
+
+  ভাষা অবশ্যই সহজ, সরল এবং একজন স্থানীয় উদ্যোক্তার জন্য বোধগম্য হতে হবে। শুধুমাত্র অনুরোধ করা JSON অবজেক্টটি প্রদান করুন, অন্য কোনো অতিরিক্ত টেক্সট বা ব্যাখ্যা ছাড়াই।
+  `;
+
+  const businessPlanSchema = {
+    type: Type.OBJECT,
+    properties: {
+      planTitle: { type: Type.STRING, description: "পরিকল্পনার শিরোনাম।" },
+      executiveSummary: { type: Type.STRING, description: "পরিকল্পনার সারসংক্ষেপ।" },
+      goals: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            goalTitle: { type: Type.STRING },
+            description: { type: Type.STRING },
+          },
+          required: ["goalTitle", "description"],
+        },
+      },
+      actionSteps: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            actionTitle: { type: Type.STRING },
+            details: { type: Type.STRING },
+            timeline: { type: Type.STRING },
+          },
+          required: ["actionTitle", "details", "timeline"],
+        },
+      },
+      potentialPartners: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            partnerType: { type: Type.STRING },
+            description: { type: Type.STRING },
+          },
+          required: ["partnerType", "description"],
+        },
+      },
+      estimatedImpact: { type: Type.STRING, description: "পরিকল্পনার আনুমানিক প্রভাব।" },
+    },
+    required: ["planTitle", "executiveSummary", "goals", "actionSteps", "potentialPartners", "estimatedImpact"],
+  };
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        temperature: 0.8,
+        topP: 0.95,
+        responseMimeType: "application/json",
+        responseSchema: businessPlanSchema,
+      }
+    });
+
+    const jsonText = response.text.trim();
+    return JSON.parse(jsonText) as BusinessPlan;
+
+  } catch (error) {
+    console.error('Error calling Gemini API for Business Plan:', error);
+    if (error instanceof Error) {
+      throw new Error(`জেমিনি এপিআই থেকে ব্যবসায়িক পরিকল্পনা তৈরি করতে ব্যর্থ হয়েছে: ${error.message}`);
+    }
+    throw new Error('ব্যবসায়িক পরিকল্পনা তৈরির সময় একটি অপ্রত্যাশিত ত্রুটি ঘটেছে।');
   }
 };

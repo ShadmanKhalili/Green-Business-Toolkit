@@ -66,3 +66,29 @@ export interface QuestionNavigatorProps {
   onJump: (index: number) => void;
   isDisabled: boolean;
 }
+
+// --- NEW: Business Plan Interfaces ---
+export interface BusinessPlanGoal {
+  goalTitle: string;
+  description: string;
+}
+
+export interface BusinessPlanActionStep {
+  actionTitle: string;
+  details: string;
+  timeline: string;
+}
+
+export interface BusinessPlanPartner {
+  partnerType: string;
+  description: string;
+}
+
+export interface BusinessPlan {
+  planTitle: string;
+  executiveSummary: string;
+  goals: BusinessPlanGoal[];
+  actionSteps: BusinessPlanActionStep[];
+  potentialPartners: BusinessPlanPartner[];
+  estimatedImpact: string;
+}
