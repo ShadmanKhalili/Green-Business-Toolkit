@@ -94,14 +94,8 @@ export const BusinessPlanCoCreator: React.FC<BusinessPlanCoCreatorProps> = ({
   };
   
   const initializeChat = (plan: BusinessPlan) => {
-    if (!process.env.API_KEY) {
-        const errorMsg = "API কী পাওয়া যায়নি। অনুগ্রহ করে নিশ্চিত করুন যে আপনার এনভায়রনমেন্ট ভেরিয়েবলে API_KEY সেট করা আছে। (API key not found. Please ensure API_KEY is set in your environment variables.)";
-        setError(errorMsg);
-        setChatHistory([{ sender: 'ai', text: errorMsg }]);
-        return;
-    }
-    
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = "AIzaSyBLfNk0Og7RO-Fxl_fuPJJYz7IgNgOWT94";
+    const ai = new GoogleGenAI({ apiKey });
     const systemInstruction = `You are a helpful assistant for a small business owner in coastal Bangladesh. Your goal is to refine their "Green Growth Business Plan". The user will provide their current plan as a JSON object and a modification request in Bengali. You MUST respond with ONLY the full, updated business plan in the exact same JSON format. Do not add any introductory text, explanations, or markdown formatting around the JSON. Your output must be a pure, valid JSON object that can be parsed directly.`;
     
     chatSessionRef.current = ai.chats.create({
