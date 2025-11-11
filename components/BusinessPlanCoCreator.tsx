@@ -94,8 +94,8 @@ export const BusinessPlanCoCreator: React.FC<BusinessPlanCoCreatorProps> = ({
   };
   
   const initializeChat = (plan: BusinessPlan) => {
-    // FIX: Use process.env.API_KEY to access the API key as per coding guidelines.
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = "AIzaSyBLfNk0Og7RO-Fxl_fuPJJYz7IgNgOWT94";
+    const ai = new GoogleGenAI({ apiKey });
     const systemInstruction = `You are a helpful assistant for a small business owner in coastal Bangladesh. Your goal is to refine their "Green Growth Business Plan". The user will provide their current plan as a JSON object and a modification request in Bengali. You MUST respond with ONLY the full, updated business plan in the exact same JSON format. Do not add any introductory text, explanations, or markdown formatting around the JSON. Your output must be a pure, valid JSON object that can be parsed directly.`;
     
     chatSessionRef.current = ai.chats.create({
