@@ -67,7 +67,8 @@ export const BusinessPlanCoCreator: React.FC<BusinessPlanCoCreatorProps> = ({
       setBusinessPlan(initialParts);
       setGenerationStep('confirmGoals');
     } catch (err) {
-      setError(err instanceof Error ? err.message : "একটি অজানা ত্রুটি ঘটেছে।");
+      const errorMessage = err instanceof Error ? err.message : "একটি অজানা ত্রুটি ঘটেছে।";
+      setError(errorMessage);
       setGenerationStep('initial');
     }
   };
@@ -88,14 +89,18 @@ export const BusinessPlanCoCreator: React.FC<BusinessPlanCoCreatorProps> = ({
       setGenerationStep('complete');
       initializeChat(fullPlan);
     } catch (err) {
-       setError(err instanceof Error ? err.message : "একটি অজানা ত্রুটি ঘটেছে।");
+       const errorMessage = err instanceof Error ? err.message : "একটি অজানা ত্রুটি ঘটেছে।";
+       setError(errorMessage);
        setGenerationStep('confirmGoals'); // Go back to confirmation step on error
     }
   };
   
   const initializeChat = (plan: BusinessPlan) => {
-    const apiKey = "AIzaSyBLfNk0Og7RO-Fxl_fuPJJYz7IgNgOWT94";
-    const ai = new GoogleGenAI({ apiKey });
+    if (!process.env.API_KEY) {
+      setError("AI সহকারীর জন্য API কী পাওয়া যায়নি।");
+      return;
+    }
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     const systemInstruction = `You are a helpful assistant for a small business owner in coastal Bangladesh. Your goal is to refine their "Green Growth Business Plan". The user will provide their current plan as a JSON object and a modification request in Bengali. You MUST respond with ONLY the full, updated business plan in the exact same JSON format. Do not add any introductory text, explanations, or markdown formatting around the JSON. Your output must be a pure, valid JSON object that can be parsed directly.`;
     
     chatSessionRef.current = ai.chats.create({
