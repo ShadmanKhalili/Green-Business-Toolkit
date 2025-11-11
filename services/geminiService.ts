@@ -2,6 +2,13 @@ import { GoogleGenAI, Type } from "@google/genai";
 import type { Answer, PreAssessmentData, BusinessPlan, BusinessPlanGoal } from '../types'; 
 import { MAX_SCORE_PER_QUESTION, QUESTION_WEIGHTS_BY_BUSINESS_TYPE } from '../constants';
 
+// Helper function to check for the API key
+const checkApiKey = () => {
+  if (!process.env.API_KEY) {
+    throw new Error("API কী পাওয়া যায়নি। অনুগ্রহ করে নিশ্চিত করুন যে আপনার এনভায়রনমেন্ট ভেরিয়েবলে API_KEY সেট করা আছে। (API key not found. Please ensure API_KEY is set in your environment variables.)");
+  }
+};
+
 export const getRecommendations = async (
   weightedScore: number, 
   weightedMaxPossibleScore: number,
@@ -9,6 +16,8 @@ export const getRecommendations = async (
   answers: Answer[],
   preAssessmentData: PreAssessmentData
 ) => {
+  checkApiKey(); // Check for API key first
+
   if (!preAssessmentData) {
     throw new Error("ব্যবসার প্রেক্ষাপট তথ্য (preAssessmentData) অনুপস্থিত।");
   }
@@ -90,6 +99,7 @@ export const generateInitialPlanParts = async (
   percentageScore: number,
   initialRecommendations: string
 ): Promise<Pick<BusinessPlan, 'planTitle' | 'executiveSummary' | 'goals'>> => {
+  checkApiKey(); // Check for API key first
     
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
@@ -148,6 +158,7 @@ export const generateRemainingPlanParts = async (
   preAssessmentData: PreAssessmentData,
   goals: BusinessPlanGoal[]
 ): Promise<Pick<BusinessPlan, 'actionSteps' | 'potentialPartners' | 'estimatedImpact'>> => {
+  checkApiKey(); // Check for API key first
 
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
